@@ -1,4 +1,4 @@
-import { QueryDataDto } from 'src/modules/api/dto/query-data.dto';
+import { QueryDataDto } from 'documents/modules/api/dto/query-data.dto';
 
 export class FilterBuilder {
   static build(query: QueryDataDto) {

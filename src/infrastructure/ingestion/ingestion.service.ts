@@ -4,7 +4,7 @@ import type { UnifiedDataRepositoryInterface } from '../../domain/repositories/u
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
 import { pipeline } from 'stream';
 import * as StreamArray from 'stream-json/streamers/StreamArray';
-import { IngestionSource } from 'src/modules/ingestion/interfaces/ingestion-source.interface';
+import { IngestionSource } from 'documents/modules/ingestion/interfaces/ingestion-source.interface';
 
 @Injectable()
 export class IngestionService {

@@ -1,11 +1,11 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-import { ApiModule } from './modules/api/api.module';
+import { ApiModule } from '../documents/modules/api/api.module';
 import { IngestionService } from './infrastructure/ingestion/ingestion.service';
 import { HttpClientService } from './infrastructure/http/http-client.service';
 import { MongoUnifiedDataRepository } from './infrastructure/persistence/mongo-unified-data.repository';
-import { registerSources } from './modules/ingestion/setup/sources.config';
+import { registerSources } from '../documents/modules/ingestion/setup/sources.config';
 
 @Module({
   imports: [
