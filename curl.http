@@ -7,7 +7,7 @@ Accept: application/json
 ###
 
 ### Search Paris available with price range
-GET {{base}}/api/data?city=Paris
+GET {{base}}/api/data?city=Paris&availability=true&priceMin=200&priceMax=600&sortBy=pricePerNight&sortDir=asc&limit=25
 Accept: application/json
 
 ###
