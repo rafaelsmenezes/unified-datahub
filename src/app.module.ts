@@ -10,7 +10,6 @@ import {
   MongoUnifiedDataSchema,
 } from './infrastructure/persistence/mongo-unified-data.schema';
 import { MongoUnifiedDataRepository } from './infrastructure/persistence/mongo-unified-data.repository';
-import { UNIFIED_DATA_REPOSITORY } from './infrastructure/persistence/providers';
 import { HttpClientService } from './infrastructure/http/http-client.service';
 import { IngestionService } from './infrastructure/ingestion/ingestion.service';
 import { IngestionScheduler } from './infrastructure/ingestion/ingestion.scheduler';
@@ -41,7 +40,7 @@ import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unif
   ],
   exports: [
     {
-      provide: UNIFIED_DATA_REPOSITORY,
+      provide: IUnifiedDataRepositoryInterfaceToken,
       useClass: MongoUnifiedDataRepository,
     },
   ],
