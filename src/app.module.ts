@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
 
 import { ApiController } from './interfaces/rest/api.controller';
+import { AdminController } from './interfaces/rest/admin.controller';
+import { IngestionUseCase } from './application/use-cases/ingestion.usecase';
 import { QueryDataUseCase } from './application/use-cases/query-data.usecase';
 import { GetDataByIdUseCase } from './application/use-cases/get-data-by-id.usecase';
 import {
@@ -26,7 +28,7 @@ import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unif
       { name: MongoUnifiedData.name, schema: MongoUnifiedDataSchema },
     ]),
   ],
-  controllers: [ApiController],
+  controllers: [ApiController, AdminController],
   providers: [
     {
       provide: IUnifiedDataRepositoryInterfaceToken,
@@ -37,6 +39,7 @@ import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unif
     IngestionScheduler,
     QueryDataUseCase,
     GetDataByIdUseCase,
+    IngestionUseCase,
   ],
   exports: [
     {
