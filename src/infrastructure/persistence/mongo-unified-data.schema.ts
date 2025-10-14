@@ -1,4 +1,3 @@
-// src/infrastructure/persistence/mongo-unified-data.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
@@ -13,6 +12,9 @@ export class MongoUnifiedData extends Document {
   @Prop() pricePerNight?: number;
   @Prop() priceSegment?: string;
   @Prop({ type: Object }) raw?: Record<string, any>;
+
+  createdAt?: Date;
+  updatedAt?: Date;
 }
 
 export const MongoUnifiedDataSchema =

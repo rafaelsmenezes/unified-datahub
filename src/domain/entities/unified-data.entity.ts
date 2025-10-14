@@ -1,7 +1,7 @@
 export class UnifiedData {
   constructor(
-    public readonly source: string,
-    public readonly externalId: string,
+    public readonly source?: string,
+    public readonly externalId?: string,
     public readonly name?: string,
     public readonly city?: string,
     public readonly country?: string,

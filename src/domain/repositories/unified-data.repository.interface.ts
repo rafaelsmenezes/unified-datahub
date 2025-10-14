@@ -9,7 +9,7 @@ export interface UnifiedDataRepositoryInterface {
     options?: {
       limit?: number;
       skip?: number;
-      sort?: Record<string, 'asc' | 'desc'>;
+      sort?: Record<string, 1 | -1>;
     },
   ): Promise<UnifiedData[]>;
   count(filters: Partial<UnifiedData>): Promise<number>;

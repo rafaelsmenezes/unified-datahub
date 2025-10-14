@@ -1,11 +1,16 @@
 import { Injectable } from '@nestjs/common';
 import type { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
+import { Inject } from '@nestjs/common';
+import { UNIFIED_DATA_REPOSITORY } from '../../infrastructure/persistence/providers';
 import { QueryDataDto } from '../../interfaces/rest/dto/query-data.dto';
 import { FilterBuilder } from './filter-builder';
 
 @Injectable()
 export class QueryDataUseCase {
-  constructor(private readonly repository: UnifiedDataRepositoryInterface) {}
+  constructor(
+    @Inject(UNIFIED_DATA_REPOSITORY)
+    private readonly repository: UnifiedDataRepositoryInterface,
+  ) {}
 
   async execute(query: QueryDataDto) {
     const filters = FilterBuilder.build(query);

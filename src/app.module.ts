@@ -1,11 +1,20 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
-import { ApiModule } from '../documents/modules/api/api.module';
-import { IngestionService } from './infrastructure/ingestion/ingestion.service';
-import { HttpClientService } from './infrastructure/http/http-client.service';
+
+import { ApiController } from './interfaces/rest/api.controller';
+import { QueryDataUseCase } from './application/use-cases/query-data.usecase';
+import { GetDataByIdUseCase } from './application/use-cases/get-data-by-id.usecase';
+import {
+  MongoUnifiedData,
+  MongoUnifiedDataSchema,
+} from './infrastructure/persistence/mongo-unified-data.schema';
 import { MongoUnifiedDataRepository } from './infrastructure/persistence/mongo-unified-data.repository';
-import { registerSources } from '../documents/modules/ingestion/setup/sources.config';
+import { UNIFIED_DATA_REPOSITORY } from './infrastructure/persistence/providers';
+import { HttpClientService } from './infrastructure/http/http-client.service';
+import { IngestionService } from './infrastructure/ingestion/ingestion.service';
+import { IngestionScheduler } from './infrastructure/ingestion/ingestion.scheduler';
+import { registerSources } from './infrastructure/ingestion/setup/sources.config';
 
 @Module({
   imports: [
@@ -13,16 +22,33 @@ import { registerSources } from '../documents/modules/ingestion/setup/sources.co
     MongooseModule.forRoot(
       process.env.MONGO_URI || 'mongodb://localhost:27017/buenro',
     ),
-    ApiModule,
+    MongooseModule.forFeature([
+      { name: MongoUnifiedData.name, schema: MongoUnifiedDataSchema },
+    ]),
   ],
-  providers: [IngestionService, HttpClientService, MongoUnifiedDataRepository],
-  exports: [IngestionService],
+  controllers: [ApiController],
+  providers: [
+    {
+      provide: UNIFIED_DATA_REPOSITORY,
+      useClass: MongoUnifiedDataRepository,
+    },
+    HttpClientService,
+    IngestionService,
+    IngestionScheduler,
+    QueryDataUseCase,
+    GetDataByIdUseCase,
+  ],
+  exports: [
+    {
+      provide: UNIFIED_DATA_REPOSITORY,
+      useClass: MongoUnifiedDataRepository,
+    },
+  ],
 })
 export class AppModule implements OnModuleInit {
   constructor(private readonly ingestionService: IngestionService) {}
 
   onModuleInit() {
-    // Register all ingestion sources at application startup
     registerSources(this.ingestionService);
   }
 }
