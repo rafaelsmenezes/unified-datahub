@@ -15,6 +15,7 @@ import { HttpClientService } from './infrastructure/http/http-client.service';
 import { IngestionService } from './infrastructure/ingestion/ingestion.service';
 import { IngestionScheduler } from './infrastructure/ingestion/ingestion.scheduler';
 import { registerSources } from './infrastructure/ingestion/setup/sources.config';
+import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unified-data.repository.interface';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { registerSources } from './infrastructure/ingestion/setup/sources.config
   controllers: [ApiController],
   providers: [
     {
-      provide: UNIFIED_DATA_REPOSITORY,
+      provide: IUnifiedDataRepositoryInterfaceToken,
       useClass: MongoUnifiedDataRepository,
     },
     HttpClientService,

@@ -1,14 +1,16 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import type { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
 import { Inject } from '@nestjs/common';
-import { UNIFIED_DATA_REPOSITORY } from '../../infrastructure/persistence/providers';
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
+import {
+  IUnifiedDataRepositoryInterface,
+  IUnifiedDataRepositoryInterfaceToken,
+} from '../../domain/repositories/unified-data.repository.interface';
 
 @Injectable()
 export class GetDataByIdUseCase {
   constructor(
-    @Inject(UNIFIED_DATA_REPOSITORY)
-    private readonly repository: UnifiedDataRepositoryInterface,
+    @Inject(IUnifiedDataRepositoryInterfaceToken)
+    private readonly repository: IUnifiedDataRepositoryInterface,
   ) {}
 
   async execute(id: string): Promise<UnifiedData> {

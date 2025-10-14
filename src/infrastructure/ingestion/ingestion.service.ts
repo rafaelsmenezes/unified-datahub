@@ -1,12 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { HttpClientService } from '../http/http-client.service';
-import type { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
+import {
+  IUnifiedDataRepositoryInterface,
+  IUnifiedDataRepositoryInterfaceToken,
+} from '../../domain/repositories/unified-data.repository.interface';
 import { Inject } from '@nestjs/common';
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
 import { pipeline } from 'stream';
 import * as StreamArray from 'stream-json/streamers/StreamArray';
 import { IngestionSource } from './interfaces/ingestion-source.interface';
-import { UNIFIED_DATA_REPOSITORY } from '../persistence/providers';
 
 @Injectable()
 export class IngestionService {
@@ -16,8 +18,8 @@ export class IngestionService {
   private readonly MAX_CONCURRENT_BATCHES = 3;
 
   constructor(
-    @Inject(UNIFIED_DATA_REPOSITORY)
-    private readonly repository: UnifiedDataRepositoryInterface,
+    @Inject(IUnifiedDataRepositoryInterfaceToken)
+    private readonly repository: IUnifiedDataRepositoryInterface,
     private readonly httpClient: HttpClientService,
   ) {}
 

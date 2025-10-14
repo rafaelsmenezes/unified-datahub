@@ -1,6 +1,6 @@
 import { UnifiedData } from '../entities/unified-data.entity';
 
-export interface UnifiedDataRepositoryInterface {
+export interface IUnifiedDataRepositoryInterface {
   saveAll(records: UnifiedData[]): Promise<void>;
   findById(id: string): Promise<UnifiedData | null>;
   findOne(filters: Partial<UnifiedData>): Promise<UnifiedData | null>;
@@ -14,3 +14,7 @@ export interface UnifiedDataRepositoryInterface {
   ): Promise<UnifiedData[]>;
   count(filters: Partial<UnifiedData>): Promise<number>;
 }
+
+export const IUnifiedDataRepositoryInterfaceToken = Symbol(
+  'IUnifiedDataRepositoryInterface',
+);

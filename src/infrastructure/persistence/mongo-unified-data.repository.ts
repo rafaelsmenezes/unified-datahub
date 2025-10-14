@@ -2,14 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
-import { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
 import { MongoUnifiedData } from './mongo-unified-data.schema';
+import { IUnifiedDataRepositoryInterface } from 'src/domain/repositories/unified-data.repository.interface';
 
 type MongoUnifiedDataLean = Omit<MongoUnifiedData, 'save' | 'remove'>;
 
 @Injectable()
 export class MongoUnifiedDataRepository
-  implements UnifiedDataRepositoryInterface
+  implements IUnifiedDataRepositoryInterface
 {
   constructor(
     @InjectModel(MongoUnifiedData.name)
