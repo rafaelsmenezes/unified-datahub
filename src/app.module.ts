@@ -1,11 +1,11 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { IngestionModule } from './modules/ingestion/ingestion.module';
-import { StorageModule } from './modules/storage/storage.module';
-import { ApiModule } from './modules/api/api.module';
-import { IngestionService } from './modules/ingestion/ingestion.service';
-import { registerSources } from './modules/ingestion/setup/sources.config';
 import { ConfigModule } from '@nestjs/config';
+import { ApiModule } from './modules/api/api.module';
+import { IngestionService } from './infrastructure/ingestion/ingestion.service';
+import { HttpClientService } from './infrastructure/http/http-client.service';
+import { MongoUnifiedDataRepository } from './infrastructure/persistence/mongo-unified-data.repository';
+import { registerSources } from './modules/ingestion/setup/sources.config';
 
 @Module({
   imports: [
@@ -13,12 +13,12 @@ import { ConfigModule } from '@nestjs/config';
     MongooseModule.forRoot(
       process.env.MONGO_URI || 'mongodb://localhost:27017/buenro',
     ),
-    IngestionModule,
-    StorageModule,
     ApiModule,
   ],
+  providers: [IngestionService, HttpClientService, MongoUnifiedDataRepository],
+  exports: [IngestionService],
 })
-export class AppModule {
+export class AppModule implements OnModuleInit {
   constructor(private readonly ingestionService: IngestionService) {}
 
   onModuleInit() {
