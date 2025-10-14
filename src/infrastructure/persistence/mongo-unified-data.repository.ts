@@ -1,6 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ClientSession } from 'mongoose';
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
 import { MongoUnifiedData } from './mongo-unified-data.schema';
 import { IUnifiedDataRepositoryInterface } from 'src/domain/repositories/unified-data.repository.interface';
@@ -11,6 +11,9 @@ type MongoUnifiedDataLean = Omit<MongoUnifiedData, 'save' | 'remove'>;
 export class MongoUnifiedDataRepository
   implements IUnifiedDataRepositoryInterface
 {
+  private readonly logger = new Logger(MongoUnifiedDataRepository.name);
+  private static readonly BULK_CHUNK_SIZE = 1000;
+
   constructor(
     @InjectModel(MongoUnifiedData.name)
     private readonly model: Model<MongoUnifiedData>,
@@ -33,11 +36,9 @@ export class MongoUnifiedDataRepository
     );
   }
 
-  /** Insert multiple records */
-  async saveAll(records: UnifiedData[]): Promise<void> {
-    if (!records.length) return;
-
-    const docs = records.map((r) => ({
+  /** Map domain entities to persistence layer docs */
+  private mapToPersistence(records: UnifiedData[]): Record<string, any>[] {
+    return records.map((r) => ({
       source: r.source,
       externalId: r.externalId,
       name: r.name,
@@ -50,19 +51,44 @@ export class MongoUnifiedDataRepository
       createdAt: r.createdAt,
       updatedAt: r.updatedAt,
     }));
+  }
 
-    // Use bulkWrite with upsert to make ingestion idempotent and resilient to duplicates
-    const ops = docs.map((doc) => ({
-      updateOne: {
-        filter: { source: doc.source, externalId: doc.externalId },
-        update: { $set: doc },
-        upsert: true,
-      },
-    }));
+  /** Insert or update multiple records (idempotent upsert) */
+  async saveAll(
+    records: UnifiedData[],
+    session?: ClientSession,
+  ): Promise<void> {
+    if (records.length === 0) return;
 
-    // Execute in bulk; for very large batches this may need chunking to avoid exceeding BSON size
-    if (ops.length) {
-      await this.model.bulkWrite(ops, { ordered: false });
+    const docs = this.mapToPersistence(records);
+
+    // Split into manageable chunks to prevent MongoDB BSON document size limits
+    for (
+      let i = 0;
+      i < docs.length;
+      i += MongoUnifiedDataRepository.BULK_CHUNK_SIZE
+    ) {
+      const chunk = docs.slice(
+        i,
+        i + MongoUnifiedDataRepository.BULK_CHUNK_SIZE,
+      );
+
+      const ops = chunk.map((doc) => ({
+        updateOne: {
+          filter: { source: doc.source, externalId: doc.externalId },
+          update: { $set: doc },
+          upsert: true,
+        },
+      }));
+
+      try {
+        await this.model.bulkWrite(ops, { ordered: false, session });
+      } catch (error) {
+        this.logger.error(
+          `Bulk write failed on chunk starting at index ${i}: ${error.message}`,
+        );
+        // Optional: decide whether to rethrow or continue
+      }
     }
   }
 
@@ -87,10 +113,9 @@ export class MongoUnifiedDataRepository
       sort?: Record<string, 1 | -1>;
     },
   ): Promise<UnifiedData[]> {
-    const limit = options?.limit ?? 25;
+    const limit = Math.min(options?.limit ?? 25, 1000); // add a safe upper cap
     const skip = options?.skip ?? 0;
-
-    const sort: Record<string, 1 | -1> = options?.sort ?? { createdAt: -1 };
+    const sort = options?.sort ?? { createdAt: -1 };
 
     const docs = await this.model
       .find(filters)
