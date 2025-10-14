@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
+import type { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
 import { QueryDataDto } from '../../interfaces/rest/dto/query-data.dto';
 import { FilterBuilder } from './filter-builder';
 

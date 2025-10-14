@@ -3,19 +3,19 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
 import { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
-import { UnifiedData as UnifiedDataDocument } from './mongo-unified-data.schema';
+import { UnifiedDataSchema as UnifiedDataMongoDocument } from './mongo-unified-data.schema';
 
 @Injectable()
 export class MongoUnifiedDataRepository
   implements UnifiedDataRepositoryInterface
 {
   constructor(
-    @InjectModel(UnifiedDataDocument.name)
-    private readonly model: Model<UnifiedDataDocument>,
+    @InjectModel(UnifiedDataMongoDocument.name)
+    private readonly model: Model<UnifiedDataMongoDocument>,
   ) {}
 
   /** Map a Mongo document to domain entity */
-  private mapToEntity(doc: UnifiedDataDocument): UnifiedData {
+  private mapToEntity(doc: UnifiedDataMongoDocument): UnifiedData {
     return new UnifiedData(
       doc.source,
       doc.externalId,
@@ -55,13 +55,13 @@ export class MongoUnifiedDataRepository
   /** Find by Mongo _id */
   async findById(id: string): Promise<UnifiedData | null> {
     const doc = await this.model.findById(id).lean();
-    return doc ? this.mapToEntity(doc as UnifiedDataDocument) : null;
+    return doc ? this.mapToEntity(doc as UnifiedDataMongoDocument) : null;
   }
 
   /** Find one matching record */
   async findOne(filters: Partial<UnifiedData>): Promise<UnifiedData | null> {
     const doc = await this.model.findOne(filters).lean();
-    return doc ? this.mapToEntity(doc as UnifiedDataDocument) : null;
+    return doc ? this.mapToEntity(doc as UnifiedDataMongoDocument) : null;
   }
 
   /** Find multiple records with optional pagination & sorting */
@@ -83,7 +83,7 @@ export class MongoUnifiedDataRepository
       .skip(skip)
       .sort(sort)
       .lean();
-    return docs.map((doc) => this.mapToEntity(doc as UnifiedDataDocument));
+    return docs.map((doc) => this.mapToEntity(doc as UnifiedDataMongoDocument));
   }
 
   /** Count documents matching filters */

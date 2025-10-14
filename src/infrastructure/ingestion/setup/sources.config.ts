@@ -1,4 +1,3 @@
-// src/infrastructure/ingestion/setup/sources.config.ts
 import { IngestionService } from '../ingestion.service';
 import { Source1Mapper } from '../mappers/source1.mapper';
 import { Source2Mapper } from '../mappers/source2.mapper';

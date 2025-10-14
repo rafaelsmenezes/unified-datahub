@@ -1,6 +1,5 @@
-// src/infrastructure/ingestion/mappers/source1.mapper.ts
-import { SourceMapper } from './mapper.interface';
 import { UnifiedData } from '../../../domain/entities/unified-data.entity';
+import { SourceMapper } from './mapper.interface';
 
 export class Source1Mapper implements SourceMapper {
   map(record: any): UnifiedData {

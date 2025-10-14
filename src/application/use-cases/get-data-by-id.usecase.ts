@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
+import type { UnifiedDataRepositoryInterface } from '../../domain/repositories/unified-data.repository.interface';
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
 
 @Injectable()
