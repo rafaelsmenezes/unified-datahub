@@ -25,3 +25,5 @@ MongoUnifiedDataSchema.index({ city: 1 });
 MongoUnifiedDataSchema.index({ pricePerNight: 1 });
 MongoUnifiedDataSchema.index({ availability: 1 });
 MongoUnifiedDataSchema.index({ name: 'text' });
+// Ensure source+externalId uniqueness so ingestion can upsert safely
+MongoUnifiedDataSchema.index({ source: 1, externalId: 1 }, { unique: true });

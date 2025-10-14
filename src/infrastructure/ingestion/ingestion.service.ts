@@ -50,10 +50,14 @@ export class IngestionService {
           pendingSaves.push(this.saveBatch(batch.splice(0, this.BATCH_SIZE)));
           if (pendingSaves.length >= this.MAX_CONCURRENT_BATCHES) {
             jsonStream.pause();
-            Promise.allSettled(pendingSaves).then(() => {
-              pendingSaves.length = 0;
-              jsonStream.resume();
-            });
+            (async () => {
+              try {
+                await Promise.allSettled(pendingSaves);
+              } finally {
+                pendingSaves.length = 0;
+                jsonStream.resume();
+              }
+            })();
           }
         }
       });

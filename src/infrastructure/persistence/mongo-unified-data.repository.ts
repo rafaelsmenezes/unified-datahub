@@ -51,7 +51,19 @@ export class MongoUnifiedDataRepository
       updatedAt: r.updatedAt,
     }));
 
-    await this.model.insertMany(docs, { ordered: false });
+    // Use bulkWrite with upsert to make ingestion idempotent and resilient to duplicates
+    const ops = docs.map((doc) => ({
+      updateOne: {
+        filter: { source: doc.source, externalId: doc.externalId },
+        update: { $set: doc },
+        upsert: true,
+      },
+    }));
+
+    // Execute in bulk; for very large batches this may need chunking to avoid exceeding BSON size
+    if (ops.length) {
+      await this.model.bulkWrite(ops, { ordered: false });
+    }
   }
 
   /** Find by Mongo _id */

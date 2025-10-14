@@ -17,13 +17,18 @@ export class FilterBuilder {
     }
 
     if (query.priceSegment) filters.priceSegment = query.priceSegment;
-    if (query.city) filters.city = { $regex: query.city, $options: 'i' };
+    if (query.city) {
+      // Escape user input to prevent accidental regex injection / ReDoS
+      const escaped = query.city.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      filters.city = { $regex: escaped, $options: 'i' };
+    }
 
     if (query.q) {
       filters.$or = [
         { name: { $regex: query.q, $options: 'i' } },
         { city: { $regex: query.q, $options: 'i' } },
-        { raw: { $regex: query.q, $options: 'i' } },
+        // Avoid running regex against nested raw object which is unsafe; search specific fields instead
+        { raw: { $elemMatch: { $regex: query.q, $options: 'i' } } },
       ];
     }
 
