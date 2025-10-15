@@ -6,7 +6,6 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.setGlobalPrefix('api');
 
-  // Swagger/OpenAPI setup
   const config = new DocumentBuilder()
     .setTitle('Buenro Tech Assessment API')
     .setDescription('APIs for unified data ingestion and querying')
