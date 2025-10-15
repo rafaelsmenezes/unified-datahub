@@ -5,10 +5,10 @@ import { Readable } from 'stream';
 @Injectable()
 export class HttpClientService {
   async getStream(url: string, config?: AxiosRequestConfig): Promise<Readable> {
-    const response = await axios.get(url, {
+    const response = await axios.get<Readable>(url, {
       ...config,
       responseType: 'stream',
     });
-    return response.data;
+    return response.data as unknown as Readable;
   }
 }
