@@ -1,8 +1,10 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { v4 as uuid } from 'uuid';
 
 @Schema({ timestamps: true })
 export class MongoUnifiedData extends Document {
+  @Prop({ required: true, unique: true, default: uuid }) id!: string;
   @Prop({ required: true, index: true }) source!: string;
   @Prop({ required: true, index: true }) externalId!: string;
   @Prop({ index: 'text' }) name?: string;

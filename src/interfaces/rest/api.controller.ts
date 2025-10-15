@@ -1,4 +1,10 @@
-import { Controller, Get, Query, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Query,
+  Param,
+  NotFoundException,
+} from '@nestjs/common';
 import {
   ApiTags,
   ApiOperation,
@@ -25,11 +31,15 @@ export class ApiController {
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get data by external id' })
+  @ApiOperation({ summary: 'Get data by UUID id' })
   @ApiOkResponse({ description: 'Found item' })
   @ApiNotFoundResponse({ description: 'Item not found' })
   async findOne(@Param('id') id: string) {
     const cleanId = id.trim();
-    return this.getDataByIdUseCase.execute(cleanId);
+    const data = await this.getDataByIdUseCase.execute(cleanId);
+    if (!data) {
+      throw new NotFoundException(`Item with id ${cleanId} not found`);
+    }
+    return data;
   }
 }
