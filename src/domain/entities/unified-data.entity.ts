@@ -1,8 +1,6 @@
-import { v4 as uuid } from 'uuid';
-
 export class UnifiedData {
   constructor(
-    public readonly id: string = uuid(),
+    public readonly id: string,
     public readonly source?: string,
     public readonly externalId?: string,
     public readonly name?: string,

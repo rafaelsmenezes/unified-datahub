@@ -1,4 +1,3 @@
-import { v4 as uuid } from 'uuid';
 import { UnifiedData } from '../../../domain/entities/unified-data.entity';
 import { SourceMapper } from './mapper.interface';
 
@@ -8,10 +7,12 @@ export class Source2Mapper implements SourceMapper {
     const externalId =
       typeof rec.id === 'string' || typeof rec.id === 'number'
         ? String(rec.id)
-        : undefined;
+        : 'unknown';
 
+    // For new records being created, we use a temporary ID
+    // MongoDB will assign the actual _id when the document is saved
     return new UnifiedData(
-      uuid(),
+      '', // Temporary ID, will be assigned by MongoDB
       'source2',
       externalId,
       undefined,
