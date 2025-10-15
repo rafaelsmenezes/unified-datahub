@@ -1,6 +1,6 @@
 import { Module, OnModuleInit } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 import { ApiController } from './interfaces/rest/api.controller';
 import { AdminController } from './interfaces/rest/admin.controller';
@@ -30,6 +30,7 @@ import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unif
   ],
   controllers: [ApiController, AdminController],
   providers: [
+    ConfigService,
     {
       provide: IUnifiedDataRepositoryInterfaceToken,
       useClass: MongoUnifiedDataRepository,
