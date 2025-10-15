@@ -1,4 +1,4 @@
-import { SourceMapper } from '../mappers/mapper.interface';
+import { SourceMapper } from './mapper.interface';
 
 export interface IngestionSource {
   name: string;
