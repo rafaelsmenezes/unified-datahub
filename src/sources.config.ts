@@ -1,4 +1,4 @@
-import { IngestionService } from 'src/infrastructure/ingestion/ingestion.service';
+import { IIngestionService } from 'src/domain/ingestion/ingestion.service.interface';
 import { Source1Mapper } from 'src/infrastructure/ingestion/mappers/source1.mapper';
 import { Source2Mapper } from 'src/infrastructure/ingestion/mappers/source2.mapper';
 import { ConfigService } from '@nestjs/config';
@@ -10,7 +10,7 @@ function getRequiredEnv(key: string, configService: ConfigService): string {
 }
 
 export function registerSources(
-  ingestionService: IngestionService,
+  ingestionService: IIngestionService,
   configService: ConfigService,
 ) {
   ingestionService.registerSource({
