@@ -1,14 +1,18 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { CronJob } from 'cron';
-import { IngestionService } from './ingestion.service';
 import { ConfigService } from '@nestjs/config';
+import {
+  IIngestionService,
+  IIngestionServiceToken,
+} from 'src/domain/ingestion/ingestion.service.interface';
 
 @Injectable()
 export class IngestionScheduler implements OnModuleInit {
   private readonly logger = new Logger(IngestionScheduler.name);
 
   constructor(
-    private readonly ingestionService: IngestionService,
+    @Inject(IIngestionServiceToken)
+    private readonly ingestionService: IIngestionService,
     private readonly configService: ConfigService,
   ) {}
 
