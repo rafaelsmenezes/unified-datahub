@@ -45,7 +45,6 @@ export class MongoUnifiedDataMapper {
       raw: entity.raw,
     };
 
-    // Only include timestamps if they exist
     if (entity.createdAt) {
       persistence.createdAt = entity.createdAt;
     }

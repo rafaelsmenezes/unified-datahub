@@ -17,19 +17,17 @@ export class Source1Mapper implements SourceMapper {
       country = typeof addr.country === 'string' ? addr.country : undefined;
     }
 
-    // For new records being created, we use a temporary ID
-    // MongoDB will assign the actual _id when the document is saved
-    return new UnifiedData(
-      '', // Temporary ID, will be assigned by MongoDB
-      'source1',
+    return UnifiedData.create({
+      source: 'source1',
       externalId,
-      typeof rec.name === 'string' ? rec.name : undefined,
+      name: typeof rec.name === 'string' ? rec.name : undefined,
       city,
       country,
-      typeof rec.isAvailable === 'boolean' ? rec.isAvailable : undefined,
-      rec.priceForNight != null ? Number(rec.priceForNight) : undefined,
-      undefined,
-      rec,
-    );
+      availability:
+        typeof rec.isAvailable === 'boolean' ? rec.isAvailable : undefined,
+      pricePerNight:
+        rec.priceForNight != null ? Number(rec.priceForNight) : undefined,
+      raw: rec,
+    });
   }
 }

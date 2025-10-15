@@ -9,19 +9,17 @@ export class Source2Mapper implements SourceMapper {
         ? String(rec.id)
         : 'unknown';
 
-    // For new records being created, we use a temporary ID
-    // MongoDB will assign the actual _id when the document is saved
-    return new UnifiedData(
-      '', // Temporary ID, will be assigned by MongoDB
-      'source2',
+    return UnifiedData.create({
+      source: 'source2',
       externalId,
-      undefined,
-      typeof rec.city === 'string' ? rec.city : undefined,
-      undefined,
-      typeof rec.availability === 'boolean' ? rec.availability : undefined,
-      rec.pricePerNight != null ? Number(rec.pricePerNight) : undefined,
-      typeof rec.priceSegment === 'string' ? rec.priceSegment : undefined,
-      rec,
-    );
+      city: typeof rec.city === 'string' ? rec.city : undefined,
+      availability:
+        typeof rec.availability === 'boolean' ? rec.availability : undefined,
+      pricePerNight:
+        rec.pricePerNight != null ? Number(rec.pricePerNight) : undefined,
+      priceSegment:
+        typeof rec.priceSegment === 'string' ? rec.priceSegment : undefined,
+      raw: rec,
+    });
   }
 }
