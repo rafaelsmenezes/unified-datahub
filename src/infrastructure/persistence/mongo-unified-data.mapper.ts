@@ -45,6 +45,10 @@ export class MongoUnifiedDataMapper {
       raw: entity.raw,
     };
 
+    if (entity.id && entity.id.trim() !== '') {
+      persistence._id = entity.id;
+    }
+
     if (entity.createdAt) {
       persistence.createdAt = entity.createdAt;
     }

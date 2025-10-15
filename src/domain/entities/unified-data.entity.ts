@@ -1,5 +1,3 @@
-import { v4 as uuid } from 'uuid';
-
 export class UnifiedData {
   constructor(
     public readonly id: string,
@@ -15,7 +13,6 @@ export class UnifiedData {
     public readonly createdAt?: Date,
     public readonly updatedAt?: Date,
   ) {
-    if (!id) throw new Error('UnifiedData must have an id');
     if (!source) throw new Error('UnifiedData must have a source');
     if (!externalId) throw new Error('UnifiedData must have an externalId');
   }
@@ -32,7 +29,7 @@ export class UnifiedData {
     raw?: Record<string, any>;
   }): UnifiedData {
     return new UnifiedData(
-      uuid(),
+      '', //ID will be set by the repository
       params.source,
       params.externalId,
       params.name,
