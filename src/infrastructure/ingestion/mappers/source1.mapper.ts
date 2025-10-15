@@ -6,7 +6,7 @@ import {
   asBoolean,
   fromAddress,
   asString,
-} from './mapper.utils';
+} from './utils/mapper.utils';
 
 export class Source1Mapper implements SourceMapper {
   map(record: unknown): UnifiedData {

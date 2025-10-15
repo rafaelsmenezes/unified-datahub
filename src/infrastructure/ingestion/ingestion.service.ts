@@ -1,13 +1,14 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { IngestionSource } from './interfaces/ingestion-source.interface';
-import { HttpClientService } from '../http/http-client.service';
-import { BatchSaverService } from './batch-saver.service';
 import {
-  batchStream,
-  fetchHttpStream,
-  mapStream,
-} from './stream-generator.service';
+  IStreamGeneratorService,
+  IStreamGeneratorServiceToken,
+} from '../../domain/ingestion/stream-generator.interface';
 import { IIngestionService } from '../../domain/ingestion/ingestion.service.interface';
+import {
+  IBatchSaverService,
+  IBatchSaverServiceToken,
+} from 'src/domain/ingestion/batch-saver.interface';
 
 @Injectable()
 export class IngestionService implements IIngestionService {
@@ -16,8 +17,10 @@ export class IngestionService implements IIngestionService {
   private static readonly BATCH_SIZE = 5000;
 
   constructor(
-    private readonly httpClient: HttpClientService,
-    private readonly batchSaver: BatchSaverService,
+    @Inject(IStreamGeneratorServiceToken)
+    private readonly streamGenerator: IStreamGeneratorService,
+    @Inject(IBatchSaverServiceToken)
+    private readonly batchSaver: IBatchSaverService,
   ) {}
 
   registerSource(source: IngestionSource): void {
@@ -37,17 +40,12 @@ export class IngestionService implements IIngestionService {
     this.logger.log(`Starting ingestion for ${name}`);
 
     try {
-      const batchedStream = batchStream(
-        mapStream(
-          fetchHttpStream(url, this.httpClient, this.logger),
-          mapper,
-          this.logger,
-        ),
+      const batchedStream = this.streamGenerator.fetch(
+        url,
+        mapper,
         IngestionService.BATCH_SIZE,
       );
-
       await this.batchSaver.saveBatches(batchedStream);
-
       this.logger.log(`✅ Finished ingestion for ${name}`);
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err);

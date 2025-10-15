@@ -5,7 +5,7 @@ import {
   asNumber,
   asBoolean,
   asString,
-} from './mapper.utils';
+} from './utils/mapper.utils';
 
 export class Source2Mapper implements SourceMapper {
   map(record: unknown): UnifiedData {
