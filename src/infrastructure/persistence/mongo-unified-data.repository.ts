@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, ClientSession } from 'mongoose';
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
 import { MongoUnifiedData } from './mongo-unified-data.schema';
-import { IUnifiedDataRepositoryInterface } from 'src/domain/repositories/unified-data.repository.interface';
+import { IUnifiedDataRepository } from 'src/domain/repositories/unified-data.repository.interface';
 import { BaseMongoRepository } from './base-mongo.repository';
 import {
   MongoUnifiedDataLean,
@@ -12,7 +12,7 @@ import {
 
 @Injectable()
 export class MongoUnifiedDataRepository
-  implements IUnifiedDataRepositoryInterface, OnModuleInit
+  implements IUnifiedDataRepository, OnModuleInit
 {
   private readonly logger = new Logger(MongoUnifiedDataRepository.name);
   private readonly baseRepo: BaseMongoRepository<MongoUnifiedData>;
