@@ -33,8 +33,14 @@ export class IngestionService {
     for (const source of this.sources) {
       try {
         await this.ingestSource(source);
-      } catch (error) {
-        this.logger.error(`Failed ingestion for ${source.name}`, error.stack);
+      } catch (error: unknown) {
+        if (error instanceof Error) {
+          this.logger.error(`Failed ingestion for ${source.name}`, error.stack);
+        } else {
+          this.logger.error(
+            `Failed ingestion for ${source.name}: ${String(error)}`,
+          );
+        }
       }
     }
   }
@@ -52,12 +58,30 @@ export class IngestionService {
     const batch: UnifiedData[] = [];
     const pendingSaves: Promise<void>[] = [];
 
-    pipeline(responseStream, jsonStream, (err) => {
-      if (err) this.logger.error(`Stream error for ${name}: ${err.message}`);
+    pipeline(responseStream, jsonStream, (err: unknown) => {
+      if (err instanceof Error) {
+        this.logger.error(`Stream error for ${name}: ${err.message}`);
+      } else if (err != null) {
+        let msg = '[unknown]';
+        try {
+          if (typeof err === 'string') msg = err;
+          else if (err instanceof Error) msg = err.message;
+          else msg = JSON.stringify(err);
+        } catch {
+          msg = '[unserializable error]';
+        }
+        this.logger.error(`Stream error for ${name}: ${msg}`);
+      }
     });
 
     for await (const { value } of jsonStream) {
-      batch.push(mapper.map(value));
+      // mapper.map accepts unknown and should return a UnifiedData
+      // defensively handle unexpected mapper outputs
+      const mapFn = (mapper as unknown as { map: (r: unknown) => UnifiedData })
+        .map;
+      const mapped = mapFn(value as unknown);
+      if (!mapped) continue;
+      batch.push(mapped);
 
       if (batch.length >= IngestionService.BATCH_SIZE) {
         pendingSaves.push(
@@ -87,8 +111,12 @@ export class IngestionService {
     try {
       await this.repository.saveAll(batch);
       this.logger.debug(`Saved batch of ${batch.length} records`);
-    } catch (error) {
-      this.logger.error(`Failed to save batch: ${error.message}`);
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        this.logger.error(`Failed to save batch: ${error.message}`);
+      } else {
+        this.logger.error(`Failed to save batch: ${String(error)}`);
+      }
     }
   }
 
