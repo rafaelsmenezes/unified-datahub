@@ -45,4 +45,21 @@ describe('Source1Mapper', () => {
     expect(r.pricePerNight).toBeUndefined();
     expect(r.availability).toBeUndefined();
   });
+
+  it('handles unexpected address shapes gracefully', () => {
+    const record = {
+      id: 'x1',
+      address: 'not-an-object',
+      priceForNight: 100,
+    } as unknown;
+
+    const r = mapper.map(record);
+    expect(r.city).toBeUndefined();
+    expect(r.country).toBeUndefined();
+  });
+
+  it('rejects negative pricePerNight in UnifiedData.create', () => {
+    const bad = { id: 'p1', priceForNight: -10 } as unknown;
+    expect(() => mapper.map(bad)).toThrow();
+  });
 });

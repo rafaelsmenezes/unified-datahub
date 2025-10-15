@@ -14,7 +14,20 @@ export class HttpClientService implements IHttpClientService {
   }
 
   async get<T>(url: string): Promise<T> {
-    const response = await axios.get<T>(url);
-    return response.data;
+    const maxAttempts = 3;
+    const baseDelay = 20;
+    let lastErr: unknown;
+    for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+      try {
+        const response = await axios.get<T>(url);
+        return response.data;
+      } catch (err: unknown) {
+        lastErr = err;
+        if (attempt >= maxAttempts) throw lastErr;
+        const delay = baseDelay * 2 ** (attempt - 1);
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+    throw lastErr;
   }
 }

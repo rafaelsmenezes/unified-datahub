@@ -132,4 +132,20 @@ describe('MongoUnifiedDataRepository', () => {
     const n = await repo.count({ source: 's' });
     expect(n).toBe(42);
   });
+
+  it('saveAll should propagate errors from baseRepo.bulkUpsert', async () => {
+    baseRepoBulkUpsertSpy.mockRejectedValue(new Error('db fail'));
+    const entity = UnifiedData.create({
+      source: 's1',
+      externalId: 'e1',
+    }).withId('id1');
+    await expect(repo.saveAll([entity])).rejects.toThrow('db fail');
+  });
+
+  it('findFiltered should throw when model.find errors', async () => {
+    (modelMock.find as jest.Mock).mockImplementation(() => {
+      throw new Error('find fail');
+    });
+    await expect(repo.findFiltered({}, {} as any)).rejects.toThrow('find fail');
+  });
 });

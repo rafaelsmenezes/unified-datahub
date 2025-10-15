@@ -48,7 +48,6 @@ describe('stream-generator.functions', () => {
   });
 
   test('fetchHttpStream handles chunked JSON across multiple chunks', async () => {
-    // Simulate chunked transfer: send the JSON array split into small buffers
     const chunks = [
       Buffer.from('['),
       Buffer.from('{"id":1}'),

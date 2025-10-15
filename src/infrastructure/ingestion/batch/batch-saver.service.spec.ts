@@ -69,4 +69,45 @@ describe('BatchSaverService', () => {
     await svc.saveBatches(batches);
     expect(saveAll).toHaveBeenCalledTimes(1);
   });
+
+  test('handles a large number of small batches while respecting concurrency', async () => {
+    const calls: number[] = [];
+    const saveAll = jest.fn().mockImplementation(async (_batch: any[]) => {
+      calls.push(1);
+      await new Promise((r) => setTimeout(r, 2));
+    });
+
+    const repository: IUnifiedDataRepository = { saveAll } as any;
+    const svc = new BatchSaverService(repository);
+
+    const batches = (async function* () {
+      for (let i = 0; i < 50; i++) {
+        yield [{ id: i } as any];
+      }
+    })();
+
+    await svc.saveBatches(batches);
+    expect(saveAll).toHaveBeenCalledTimes(50);
+  }, 20000);
+
+  test('very large stream stress test', async () => {
+    const calls: number[] = [];
+    const saveAll = jest.fn().mockImplementation(async () => {
+      calls.push(1);
+      await new Promise((r) => setTimeout(r, 1));
+    });
+
+    const repository: IUnifiedDataRepository = { saveAll } as any;
+    const svc = new BatchSaverService(repository);
+
+    const batches = (async function* () {
+      await Promise.resolve();
+      for (let i = 0; i < 500; i++) {
+        yield [{ id: i } as any];
+      }
+    })();
+
+    await svc.saveBatches(batches);
+    expect(saveAll).toHaveBeenCalledTimes(500);
+  }, 60000);
 });
