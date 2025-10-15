@@ -4,14 +4,8 @@ import { MongoUnifiedData } from './mongo-unified-data.schema';
 type MongoUnifiedDataLean = Omit<MongoUnifiedData, 'save' | 'remove'>;
 
 export class MongoUnifiedDataMapper {
-  /**
-   * Converts a Mongo document (plain or lean) to a domain entity.
-   */
   static toDomain(doc: Partial<MongoUnifiedDataLean>): UnifiedData {
-    if (!doc) {
-      throw new Error('Cannot map empty document to UnifiedData entity');
-    }
-
+    if (!doc) throw new Error('Cannot map empty document to UnifiedData');
     return new UnifiedData(
       doc.source,
       doc.externalId,
@@ -27,15 +21,12 @@ export class MongoUnifiedDataMapper {
     );
   }
 
-  /**
-   * Converts a domain entity to a plain persistence object
-   * (ready for Mongo insertion / upsert).
-   */
-  static toPersistence(entity: UnifiedData): Record<string, any> {
-    if (!entity) {
-      throw new Error('Cannot map empty entity to persistence object');
-    }
+  static toDomainMany(docs: Partial<MongoUnifiedDataLean>[]): UnifiedData[] {
+    return docs.map((d) => this.toDomain(d));
+  }
 
+  static toPersistence(entity: UnifiedData): Record<string, any> {
+    if (!entity) throw new Error('Cannot map empty entity to persistence');
     return {
       source: entity.source,
       externalId: entity.externalId,
@@ -51,17 +42,7 @@ export class MongoUnifiedDataMapper {
     };
   }
 
-  /**
-   * Maps an array of domain entities to persistence objects.
-   */
   static toPersistenceMany(entities: UnifiedData[]): Record<string, any>[] {
     return entities.map((e) => this.toPersistence(e));
-  }
-
-  /**
-   * Maps an array of Mongo documents to domain entities.
-   */
-  static toDomainMany(docs: Partial<MongoUnifiedDataLean>[]): UnifiedData[] {
-    return docs.map((d) => this.toDomain(d));
   }
 }
