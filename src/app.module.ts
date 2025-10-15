@@ -1,4 +1,4 @@
-import { Module, OnModuleInit } from '@nestjs/common';
+import { Module, OnModuleInit, Inject } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -14,9 +14,14 @@ import {
 import { MongoUnifiedDataRepository } from './infrastructure/persistence/mongo-unified-data.repository';
 import { HttpClientService } from './infrastructure/http/http-client.service';
 import { IngestionService } from './infrastructure/ingestion/ingestion.service';
+import { BatchSaverService } from './infrastructure/ingestion/batch-saver.service';
 import { IngestionScheduler } from './infrastructure/ingestion/ingestion.scheduler';
 import { registerSources } from './sources.config';
-import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unified-data.repository.interface';
+import { IUnifiedDataRepositoryToken } from './domain/repositories/unified-data.repository.interface';
+import {
+  IIngestionService,
+  IIngestionServiceToken,
+} from './domain/ingestion/ingestion.service.interface';
 
 @Module({
   imports: [
@@ -32,11 +37,16 @@ import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unif
   providers: [
     ConfigService,
     {
-      provide: IUnifiedDataRepositoryInterfaceToken,
+      provide: IUnifiedDataRepositoryToken,
       useClass: MongoUnifiedDataRepository,
     },
+    {
+      provide: IIngestionServiceToken,
+      useClass: IngestionService,
+    },
     HttpClientService,
-    IngestionService,
+    BatchSaverService,
+
     IngestionScheduler,
     QueryDataUseCase,
     GetDataByIdUseCase,
@@ -44,13 +54,20 @@ import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unif
   ],
   exports: [
     {
-      provide: IUnifiedDataRepositoryInterfaceToken,
+      provide: IUnifiedDataRepositoryToken,
       useClass: MongoUnifiedDataRepository,
+    },
+    {
+      provide: IIngestionServiceToken,
+      useClass: IngestionService,
     },
   ],
 })
 export class AppModule implements OnModuleInit {
-  constructor(private readonly ingestionService: IngestionService) {}
+  constructor(
+    @Inject(IIngestionServiceToken)
+    private readonly ingestionService: IIngestionService,
+  ) {}
 
   onModuleInit() {
     registerSources(this.ingestionService, new ConfigService());
