@@ -62,7 +62,8 @@
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.7.3",
-    "typescript-eslint": "^8.20.0"
+    "typescript-eslint": "^8.20.0",
+    "mongodb-memory-server": "^8.12.0"
   },
   "jest": {
     "moduleFileExtensions": [
@@ -74,6 +75,16 @@
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "moduleNameMapper": {
+      "^src/(.*)$": "<rootDir>/../src/$1"
+    },
+    "globals": {
+      "ts-jest": {
+        "diagnostics": {
+          "ignoreCodes": [151002]
+        }
+      }
     },
     "collectCoverageFrom": [
       "**/*.(t|j)s"
