@@ -1,24 +1,25 @@
 import { UnifiedData } from '../../../domain/entities/unified-data.entity';
-import { SourceMapper } from './mapper.interface';
+import { SourceMapper } from '../interfaces/mapper.interface';
+import {
+  extractExternalId,
+  asNumber,
+  asBoolean,
+  asString,
+} from './mapper.utils';
 
 export class Source2Mapper implements SourceMapper {
   map(record: unknown): UnifiedData {
     const rec = record as Record<string, unknown>;
-    const externalId =
-      typeof rec.id === 'string' || typeof rec.id === 'number'
-        ? String(rec.id)
-        : 'unknown';
+
+    const externalId = extractExternalId(rec, 'source2');
 
     return UnifiedData.create({
       source: 'source2',
       externalId,
-      city: typeof rec.city === 'string' ? rec.city : undefined,
-      availability:
-        typeof rec.availability === 'boolean' ? rec.availability : undefined,
-      pricePerNight:
-        rec.pricePerNight != null ? Number(rec.pricePerNight) : undefined,
-      priceSegment:
-        typeof rec.priceSegment === 'string' ? rec.priceSegment : undefined,
+      city: asString(rec, 'city'),
+      availability: asBoolean(rec, 'availability'),
+      pricePerNight: asNumber(rec, 'pricePerNight'),
+      priceSegment: asString(rec, 'priceSegment'),
       raw: rec,
     });
   }
