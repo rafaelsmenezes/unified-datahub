@@ -28,6 +28,10 @@ export class UnifiedData {
     priceSegment?: string;
     raw?: Record<string, any>;
   }): UnifiedData {
+    if (params.pricePerNight != null && params.pricePerNight < 0) {
+      throw new Error('pricePerNight cannot be negative');
+    }
+
     return new UnifiedData(
       '', //ID will be set by the repository
       params.source,
