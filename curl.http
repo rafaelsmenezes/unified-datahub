@@ -1,7 +1,7 @@
 @base = http://localhost:3000
 
 ### Get first page (25)
-GET {{base}}/api/data?limit=25
+GET {{base}}/api/data?limit=5
 Accept: application/json
 
 ###
@@ -19,5 +19,5 @@ Accept: application/json
 ###
 
 ### Get single document by Mongo _id
-GET {{base}}/api/data/68ee4ce105c85feba9d3c504
+GET {{base}}/api/data/68eec196ad26835bb0d9f32c
 Accept: application/json
