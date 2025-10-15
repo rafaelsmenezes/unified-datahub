@@ -157,7 +157,6 @@ describe('BaseMongoRepository', () => {
   });
 
   test('bulkUpsert chunks docs according to BULK_CHUNK_SIZE', async () => {
-    // Monkeypatch chunk size to 2 for testing
     (BaseMongoRepository as any).BULK_CHUNK_SIZE = 2;
 
     const docs = [
@@ -171,7 +170,6 @@ describe('BaseMongoRepository', () => {
 
     await repo.bulkUpsert(docs, keySelector);
 
-    // Expect 3 calls: [c1,c2], [c3,c4], [c5]
     expect(modelMock.bulkWrite).toHaveBeenCalledTimes(3);
 
     const firstCallOps = [
