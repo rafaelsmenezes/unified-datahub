@@ -8,7 +8,7 @@ import { IIngestionService } from '../../domain/ingestion/ingestion.service.inte
 import {
   IBatchSaverService,
   IBatchSaverServiceToken,
-} from 'src/domain/ingestion/batch-saver.interface';
+} from '../../domain/ingestion/batch-saver.interface';
 
 @Injectable()
 export class IngestionService implements IIngestionService {
