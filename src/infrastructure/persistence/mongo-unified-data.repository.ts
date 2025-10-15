@@ -5,20 +5,23 @@ import { UnifiedData } from '../../domain/entities/unified-data.entity';
 import { MongoUnifiedData } from './mongo-unified-data.schema';
 import { IUnifiedDataRepositoryInterface } from 'src/domain/repositories/unified-data.repository.interface';
 import { BaseMongoRepository } from './base-mongo.repository';
-import { MongoUnifiedDataMapper } from './mongo-unified-data.mapper';
+import {
+  MongoUnifiedDataLean,
+  MongoUnifiedDataMapper,
+} from './mongo-unified-data.mapper';
 
 @Injectable()
 export class MongoUnifiedDataRepository
-  extends BaseMongoRepository<MongoUnifiedData>
   implements IUnifiedDataRepositoryInterface, OnModuleInit
 {
   private readonly logger = new Logger(MongoUnifiedDataRepository.name);
+  private readonly baseRepo: BaseMongoRepository<MongoUnifiedData>;
 
   constructor(
     @InjectModel(MongoUnifiedData.name)
-    model: Model<MongoUnifiedData>,
+    private readonly model: Model<MongoUnifiedData>,
   ) {
-    super(model);
+    this.baseRepo = new BaseMongoRepository(model);
   }
 
   async onModuleInit() {
@@ -31,13 +34,22 @@ export class MongoUnifiedDataRepository
     session?: ClientSession,
   ): Promise<void> {
     if (!records.length) return;
-
     const docs = MongoUnifiedDataMapper.toPersistenceMany(records);
-    await this.bulkUpsert(
+    await this.baseRepo.bulkUpsert(
       docs,
       (d) => ({ source: d.source!, externalId: d.externalId! }),
       session,
     );
+  }
+
+  async findById(id: string): Promise<UnifiedData | null> {
+    const doc = await this.baseRepo.findById(id);
+    return doc ? MongoUnifiedDataMapper.toDomain(doc) : null;
+  }
+
+  async findOne(filters: Partial<UnifiedData>): Promise<UnifiedData | null> {
+    const doc = await this.baseRepo.findOne(filters);
+    return doc ? MongoUnifiedDataMapper.toDomain(doc) : null;
   }
 
   async findFiltered(
@@ -59,22 +71,12 @@ export class MongoUnifiedDataRepository
       .limit(limit)
       .skip(skip)
       .sort(sort)
-      .lean();
+      .lean<MongoUnifiedDataLean[]>();
 
     return MongoUnifiedDataMapper.toDomainMany(docs);
   }
 
-  async findById(id: string): Promise<UnifiedData | null> {
-    const doc = await this.model.findById(id).lean();
-    return doc ? MongoUnifiedDataMapper.toDomain(doc) : null;
-  }
-
-  async findOne(filters: Partial<UnifiedData>): Promise<UnifiedData | null> {
-    const doc = await this.model.findOne(filters).lean();
-    return doc ? MongoUnifiedDataMapper.toDomain(doc) : null;
-  }
-
   async count(filters: Partial<UnifiedData>): Promise<number> {
-    return this.model.countDocuments(filters);
+    return this.baseRepo.count(filters);
   }
 }

@@ -1,7 +1,7 @@
 import { UnifiedData } from '../../domain/entities/unified-data.entity';
 import { MongoUnifiedData } from './mongo-unified-data.schema';
 
-type MongoUnifiedDataLean = Omit<MongoUnifiedData, 'save' | 'remove'>;
+export type MongoUnifiedDataLean = Omit<MongoUnifiedData, 'save' | 'remove'>;
 
 export class MongoUnifiedDataMapper {
   static toDomain(doc: Partial<MongoUnifiedDataLean>): UnifiedData {
