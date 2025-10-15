@@ -15,7 +15,7 @@ import { MongoUnifiedDataRepository } from './infrastructure/persistence/mongo-u
 import { HttpClientService } from './infrastructure/http/http-client.service';
 import { IngestionService } from './infrastructure/ingestion/ingestion.service';
 import { IngestionScheduler } from './infrastructure/ingestion/ingestion.scheduler';
-import { registerSources } from './infrastructure/ingestion/setup/sources.config';
+import { registerSources } from './sources.config';
 import { IUnifiedDataRepositoryInterfaceToken } from './domain/repositories/unified-data.repository.interface';
 
 @Module({
@@ -53,6 +53,6 @@ export class AppModule implements OnModuleInit {
   constructor(private readonly ingestionService: IngestionService) {}
 
   onModuleInit() {
-    registerSources(this.ingestionService);
+    registerSources(this.ingestionService, new ConfigService());
   }
 }
