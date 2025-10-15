@@ -1,6 +1,6 @@
 import { Model, FilterQuery, UpdateQuery, ClientSession } from 'mongoose';
 
-export abstract class BaseMongoRepository<T> {
+export class BaseMongoRepository<T> {
   protected static readonly BULK_CHUNK_SIZE = 1000;
 
   constructor(protected readonly model: Model<T>) {}
