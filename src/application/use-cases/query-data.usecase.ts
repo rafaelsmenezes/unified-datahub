@@ -5,7 +5,7 @@ import {
 } from '../../domain/repositories/unified-data.repository.interface';
 import { Inject } from '@nestjs/common';
 import { QueryDataDto } from '../../interfaces/rest/dto/query-data.dto';
-import { FilterBuilder } from './filter-builder';
+import { FilterBuilder } from './utils/filter-builder';
 
 @Injectable()
 export class QueryDataUseCase {
