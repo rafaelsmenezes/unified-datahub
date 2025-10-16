@@ -103,7 +103,7 @@ describe('DataController (e2e)', () => {
       .query({ city: 'Lisbon', limit: '4', skip: '2' })
       .expect(200);
 
-    expect(capturedFilters.city).toBe('Lisbon');
+    expect(capturedFilters.city).toEqual({ $regex: 'Lisbon', $options: 'i' });
     expect(capturedOptions.limit).toBe(4);
     expect(capturedOptions.skip).toBe(2);
   });
