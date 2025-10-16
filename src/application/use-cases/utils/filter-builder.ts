@@ -17,7 +17,10 @@ export class FilterBuilder {
       if (typeof query.priceMax === 'number') {
         range.$lte = query.priceMax;
       }
-      filters.pricePerNight = range;
+      // Only set pricePerNight when we actually have at least one bound
+      if (Object.keys(range).length > 0) {
+        filters.pricePerNight = range;
+      }
     }
 
     if (query.priceSegment) filters.priceSegment = query.priceSegment;
@@ -32,7 +35,8 @@ export class FilterBuilder {
       filters.$or = [
         { name: { $regex: q, $options: 'i' } },
         { city: { $regex: q, $options: 'i' } },
-        { raw: { $elemMatch: { $regex: q, $options: 'i' } } },
+        { 'raw.description': { $regex: q, $options: 'i' } },
+        { 'raw.title': { $regex: q, $options: 'i' } },
       ];
     }
 
