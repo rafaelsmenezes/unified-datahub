@@ -22,14 +22,33 @@ describe('GetDataByIdUseCase', () => {
       pricePerNight: 100,
       priceSegment: 'mid',
       raw: { a: 1 },
-    }).withId('id-1');
+    }).withId('mongo-1');
 
     const repo = makeRepository(sample);
+    repo.findById = jest.fn().mockResolvedValue(sample);
     const usecase = new GetDataByIdUseCase(repo as any);
 
-    const result = await usecase.execute('ext-123');
+    const result = await usecase.execute('mongo-1');
 
-    expect(repo.findOne).toHaveBeenCalledWith({ externalId: 'ext-123' });
+    expect(repo.findById).toHaveBeenCalledWith('mongo-1');
+    expect(repo.findOne).not.toHaveBeenCalled();
+    expect(result).toBe(sample);
+  });
+
+  it('returns item when repository.findById matches internal id', async () => {
+    const sample = UnifiedData.create({
+      source: 'src1',
+      externalId: 'ext-123',
+    }).withId('mongo-1');
+
+    const repo = makeRepository(sample);
+    repo.findById = jest.fn().mockResolvedValue(sample);
+    const usecase = new GetDataByIdUseCase(repo as any);
+
+    const result = await usecase.execute('mongo-1');
+
+    expect(repo.findById).toHaveBeenCalledWith('mongo-1');
+    expect(repo.findOne).not.toHaveBeenCalled();
     expect(result).toBe(sample);
   });
 
@@ -40,6 +59,7 @@ describe('GetDataByIdUseCase', () => {
     await expect(usecase.execute('missing-id')).rejects.toThrow(
       NotFoundException,
     );
-    expect(repo.findOne).toHaveBeenCalledWith({ externalId: 'missing-id' });
+    expect(repo.findById).toHaveBeenCalledWith('missing-id');
+    expect(repo.findOne).not.toHaveBeenCalled();
   });
 });

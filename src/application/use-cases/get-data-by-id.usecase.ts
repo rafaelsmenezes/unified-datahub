@@ -14,7 +14,7 @@ export class GetDataByIdUseCase {
   ) {}
 
   async execute(id: string): Promise<UnifiedData> {
-    const item = await this.repository.findOne({ externalId: id });
+    const item = await this.repository.findById(id);
     if (!item) {
       throw new NotFoundException(`Data not found: ${id}`);
     }
