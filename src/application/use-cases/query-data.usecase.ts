@@ -1,9 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 import {
   IUnifiedDataRepository,
   IUnifiedDataRepositoryToken,
 } from '../../domain/repositories/unified-data.repository.interface';
-import { Inject } from '@nestjs/common';
 import { QueryDataDto } from '../../interfaces/rest/dto/query-data.dto';
 import { FilterBuilder } from './utils/filter-builder';
 
@@ -16,16 +15,7 @@ export class QueryDataUseCase {
 
   async execute(query: QueryDataDto) {
     const filters = FilterBuilder.build(query);
-
-    const rawLimit = query.limit ?? 100;
-    const rawSkip = query.skip ?? 0;
-
-    const limit = Math.min(Math.max(Number(rawLimit) || 0, 1), 1000);
-    const skip = Math.max(Number(rawSkip) || 0, 0);
-
-    const sort: Record<string, 1 | -1> = {};
-    if (query.sortBy) sort[query.sortBy] = query.sortDir === 'asc' ? 1 : -1;
-    else sort.createdAt = -1;
+    const { limit, skip, sort } = this.buildQueryOptions(query);
 
     const [items, total] = await Promise.all([
       this.repository.findFiltered(filters, { limit, skip, sort }),
@@ -33,5 +23,22 @@ export class QueryDataUseCase {
     ]);
 
     return { items, meta: { total, limit, skip } };
+  }
+
+  private buildQueryOptions(query: QueryDataDto) {
+    const rawLimit = Number(query.limit) || 100;
+    const rawSkip = Number(query.skip) || 0;
+
+    const limit = Math.min(Math.max(rawLimit, 1), 1000);
+    const skip = Math.max(rawSkip, 0);
+
+    const sort: Record<string, 1 | -1> = {};
+    if (query.sortBy) {
+      sort[query.sortBy] = query.sortDir === 'asc' ? 1 : -1;
+    } else {
+      sort.createdAt = -1;
+    }
+
+    return { limit, skip, sort };
   }
 }

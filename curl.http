@@ -1,7 +1,7 @@
 @base = http://localhost:3000
 
 ### Get first page (25)
-GET {{base}}/api/data?limit=3&page=1
+GET {{base}}/api/data?limit=3&page=450
 Accept: application/json
 
 ### Search Paris available with price range
@@ -13,7 +13,7 @@ GET {{base}}/api/data?q=beach
 Accept: application/json
 
 ### Get single document by Mongo _id
-GET {{base}}/api/data/68eec196ad26835bb0d9f32c
+GET {{base}}/api/data/68f0f9e9d1606ef2d099a9f6
 Accept: application/json
 
 ### Full text search
@@ -27,32 +27,12 @@ Accept: application/json
 ### Get by price segment
 GET {{base}}/api/data?priceSegment=low
 
-
 ### Filter by Prince range edge cases
 GET {{base}}/api/data?priceMin=300&priceMax=300
-Accept: application/json
-
-### Availability false (unavailable)
-GET {{base}}/api/data?availability=false&limit=25
-Accept: application/json
-
-### Only priceMin
-GET {{base}}/api/data?priceMin=150&limit=25
-Accept: application/json
-
-### Only priceMax
-GET {{base}}/api/data?priceMax=400&limit=25
 Accept: application/json
 
 ### Pagination example (page 3, page size 10)
 GET {{base}}/api/data?limit=10&skip=20&sortBy=createdAt&sortDir=desc
 Accept: application/json
 
-### Complex combined filters
-GET {{base}}/api/data?q=sea%20view&city=Lisbon&availability=true&priceMin=80&priceMax=350&priceSegment=midrange&sortBy=pricePerNight&sortDir=asc&limit=20
-Accept: application/json
-
-### Special characters in q / city
-GET {{base}}/api/data?q=sea%20view%20%26%20pool&city=M%C3%BCnchen&limit=10
-Accept: application/json
 

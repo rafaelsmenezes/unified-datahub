@@ -27,19 +27,7 @@ export class DataController {
   @Get()
   @QueryDataDocs()
   async find(@Query() query: QueryDataDto, @Query() rawQuery: any) {
-    const adapted: any = { ...query };
-
-    if (rawQuery?.pageSize !== undefined && rawQuery?.page === undefined) {
-      adapted.limit = Number(rawQuery.pageSize);
-    }
-
-    if (rawQuery?.page !== undefined) {
-      const page = Number(rawQuery.page) || 0;
-      const pageSize = Number(rawQuery.pageSize) || adapted.limit || 100;
-      adapted.limit = pageSize;
-      adapted.skip = Math.max(0, page * pageSize);
-    }
-
+    const adapted = this.adaptQuery(query, rawQuery);
     return this.queryDataUseCase.execute(adapted);
   }
 
@@ -54,5 +42,22 @@ export class DataController {
       throw new NotFoundException(`Item with id ${cleanId} not found`);
     }
     return data;
+  }
+
+  private adaptQuery(query: QueryDataDto, rawQuery: any): QueryDataDto {
+    const adapted: QueryDataDto = { ...query };
+
+    if (rawQuery?.pageSize !== undefined && rawQuery?.page === undefined) {
+      adapted.limit = Number(rawQuery.pageSize);
+    }
+
+    if (rawQuery?.page !== undefined) {
+      const page = Number(rawQuery.page) || 0;
+      const pageSize = Number(rawQuery.pageSize) || adapted.limit || 100;
+      adapted.limit = pageSize;
+      adapted.skip = Math.max(0, page * pageSize);
+    }
+
+    return adapted;
   }
 }
