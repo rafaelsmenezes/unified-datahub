@@ -1,4 +1,4 @@
-import { QueryDataUseCase } from '../../../dist/application/use-cases/query-data.usecase';
+import { QueryDataUseCase } from './query-data.usecase';
 
 describe('QueryDataUseCase', () => {
   const makeRepo = (items: any[], total = items.length) => ({
