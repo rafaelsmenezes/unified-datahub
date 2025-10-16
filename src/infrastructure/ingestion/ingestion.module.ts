@@ -8,9 +8,10 @@ import { IIngestionServiceToken } from 'src/domain/ingestion/ingestion.service.i
 import { IStreamGeneratorServiceToken } from 'src/domain/ingestion/stream-generator.interface';
 import { PersistenceModule } from '../persistence/persistence.module';
 import { HttpModule } from '../http/http.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
-  imports: [PersistenceModule, HttpModule],
+  imports: [ConfigModule, PersistenceModule, HttpModule],
 
   providers: [
     {
