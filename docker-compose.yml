@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   mongo:
-    image: mongo:6
+    image: mongo
     container_name: buenro-mongo
     ports:
       - "27017:27017"
