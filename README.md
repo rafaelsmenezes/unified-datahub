@@ -1,98 +1,182 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+---
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+# Buenro Tech Assessment – Backend Solution
 
-## Description
+## Overview
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project implements a **scalable ingestion and querying backend** using **NestJS**, **TypeScript**, and **MongoDB**, designed to support multiple external JSON sources of varying structure.
 
-## Project setup
+It fulfills the requirements of the Buenro Senior Backend Engineer technical case:
 
-```bash
-$ npm install
+* Ingest multiple external JSONs (from S3) of sizes from KB to GB.
+* Store data in a unified structure that supports efficient queries.
+* Provide a single API endpoint with flexible filtering logic.
+* Easily extendable to new data sources.
+
+---
+
+## 🧱 Architecture
+
+```
+src/
+├── domain/                    # Entities and interfaces
+├── application/               # Business logic (use cases)
+├── infrastructure/            # Data integration, storage, ingestion pipeline
+├── interfaces/                # Controllers and DTOs for REST API
+└── main.ts                    # Application bootstrap
 ```
 
-## Compile and run the project
+### Layers
+
+* **Domain:** Core definitions, contracts, and business rules.
+* **Application:** Use-cases coordinating ingestion and queries.
+* **Infrastructure:** Concrete components (HTTP client, mappers, Mongo repository, batching).
+* **Interfaces:** API controllers, data transformations, validation.
+
+---
+
+## ⚙️ Key Capabilities
+
+### Data Ingestion
+
+* Streams JSON from remote sources via HTTP (S3 endpoints).
+* Processes large files without loading entire content into memory.
+* Uses `batchStream` and bulk upsert to efficiently persist data.
+* Supports multiple sources with separate mappers and registration.
+
+### Unified Data Model
+
+* A single `UnifiedData` entity captures common fields, plus `raw` for extras.
+* Mongo schema supports indexes on frequently filtered fields.
+* Compound index `{ source, externalId }` ensures idempotency.
+* Dynamic extensibility via the `raw` field for additional attributes.
+
+### API & Filtering
+
+* Endpoint: `GET /api/data`
+* Filterable parameters:
+
+  * `q` (text search), `source`, `city`, boolean `availability`, numeric `priceMin / priceMax`, `priceSegment`.
+* Supports pagination, sorting, and combined filters.
+* `GET /api/data/:id` returns single item, or `404` if not found.
+
+---
+
+## 🧩 How to Run
+
+### Prerequisites
+
+* Node.js (v20+)
+* MongoDB (local or remote)
+* (Optional) Docker for Mongo
+
+### Setup
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+git clone https://github.com/rafaelsmenezes/buenro-tech-assessment.git
+cd buenro-tech-assessment
+npm install
 ```
 
-## Run tests
+Create `.env` file:
+
+```
+MONGODB_URI=mongodb://localhost:27017/buenro
+PORT=3000
+SOURCE1_URL=<your source1 JSON URL>
+SOURCE2_URL=<your source2 JSON URL>
+INGESTION_CRON=0 8 * * *
+```
+
+### Run
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+npm run start:dev
 ```
 
-## Deployment
+To ingest data:
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+```
+POST /api/admin/ingest
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+---
 
-## Resources
+## 🔍 Example Query
 
-Check out a few resources that may come in handy when working with NestJS:
+```
+GET http://localhost:3000/api/data?q=Lisbon&source=source1&priceMin=100
+```
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+Sample response:
 
-## Support
+```json
+{
+  "items": [
+    {
+      "source": "source1",
+      "externalId": "123456",
+      "name": "Ocean View Apartment",
+      "city": "Lisbon",
+      "pricePerNight": 320,
+      "availability": true,
+      "raw": { /* original record */ }
+    }
+  ],
+  "meta": {
+    "total": 1,
+    "limit": 25,
+    "skip": 0
+  }
+}
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+---
 
-## Stay in touch
+## 🚀 Extending to New Sources
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+To support an additional JSON source:
 
-## License
+1. Create a new mapper in `infrastructure/ingestion/mappers` (e.g. `Source3Mapper`) implementing `map(record: any): UnifiedData`.
+2. Add its registration in `registerSources` (in `sources.config.ts`).
+3. The ingestion pipeline will automatically process it with existing batching, streaming, and persistence logic.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+No changes to core ingestion or API layers are required.
+
+---
+
+## 🧠 Design Decisions & Trade-offs
+
+| Concern                | Approach Taken                                |
+| ---------------------- | --------------------------------------------- |
+| Large JSON handling    | Streaming + batching, avoiding memory bloat   |
+| High-throughput writes | Bulk upserts in chunked operations            |
+| Schema flexibility     | Unified schema + `raw` for optional extras    |
+| Query flexibility      | Dynamic filter builder, regex support         |
+| Performance            | Indexed fields, lean queries, bulk writes     |
+| Extensibility          | Mapper + registration pattern for new sources |
+
+---
+
+## ✔️ Readiness Assessment
+
+This solution satisfies all required criteria of the technical challenge:
+
+* Architecture is modular and extensible.
+* Data model is unified and index-aware.
+* Filtering logic is comprehensive (text, numeric, boolean).
+* Performance and memory usage are carefully considered.
+* Adding a new source is trivial via mapper + registration.
+
+Future improvements include ingestion parallelism, structured logging, and dynamic filter builder for new raw fields.
+
+---
+
+## 📎 Author & Links
+
+**Rafael Menezes**
+GitHub: [https://github.com/rafaelsmenezes](https://github.com/rafaelsmenezes)
+LinkedIn: [https://www.linkedin.com/in/rafaelsilvamenezes](https://www.linkedin.com/in/rafaelsilvamenezes)
+
+---
