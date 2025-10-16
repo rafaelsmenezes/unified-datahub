@@ -17,7 +17,6 @@ export class FilterBuilder {
       if (typeof query.priceMax === 'number') {
         range.$lte = query.priceMax;
       }
-      // Only set pricePerNight when we actually have at least one bound
       if (Object.keys(range).length > 0) {
         filters.pricePerNight = range;
       }
