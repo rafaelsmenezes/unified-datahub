@@ -166,7 +166,7 @@ describe('ApiController (integration)', () => {
 
     expect(capturedFilters).toEqual({});
     expect(capturedOptions).toBeDefined();
-    expect(capturedOptions.limit).toBe(25);
+    expect(capturedOptions.limit).toBe(100);
     expect(capturedOptions.skip).toBe(0);
     expect(capturedOptions.sort).toEqual({ createdAt: -1 });
   });

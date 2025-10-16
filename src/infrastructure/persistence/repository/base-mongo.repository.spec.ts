@@ -59,7 +59,7 @@ describe('BaseMongoRepository', () => {
     expect(res).toBe(expected);
   });
 
-  test('findMany uses default options (limit=25, skip=0, sort={createdAt:-1})', async () => {
+  test('findMany uses default options (limit=100, skip=0, sort={createdAt:-1})', async () => {
     const docs = [{ _id: 'a' }, { _id: 'b' }];
     const chain = makeChainable(docs);
     modelMock.find.mockReturnValue(chain);
@@ -67,7 +67,7 @@ describe('BaseMongoRepository', () => {
     const res = await repo.findMany({ active: true });
 
     expect(modelMock.find).toHaveBeenCalledWith({ active: true });
-    expect(chain.limit).toHaveBeenCalledWith(25);
+    expect(chain.limit).toHaveBeenCalledWith(100);
     expect(chain.skip).toHaveBeenCalledWith(0);
     expect(chain.sort).toHaveBeenCalledWith({ createdAt: -1 });
     expect(chain.lean).toHaveBeenCalled();

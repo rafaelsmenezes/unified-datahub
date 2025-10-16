@@ -2,6 +2,9 @@ import {
   IsOptional,
   IsString,
   IsBoolean,
+  IsInt,
+  Min,
+  Max,
   IsNumber,
   IsIn,
 } from 'class-validator';
@@ -46,15 +49,29 @@ export class QueryDataDto {
   @IsIn(['asc', 'desc'])
   sortDir?: 'asc' | 'desc';
 
-  @ApiPropertyOptional({ type: 'number', default: 25 })
+  @ApiPropertyOptional({
+    type: 'number',
+    default: 100,
+    description: 'Maximum number of items to return (default 100, max 1000)',
+    example: 50,
+  })
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
-  limit = 25;
+  @IsInt()
+  @Min(1)
+  @Max(1000)
+  limit = 100;
 
-  @ApiPropertyOptional({ type: 'number', default: 0 })
+  @ApiPropertyOptional({
+    type: 'number',
+    default: 0,
+    description:
+      'Number of items to skip (default 0). Use with limit for pagination',
+    example: 0,
+  })
   @IsOptional()
   @Type(() => Number)
-  @IsNumber()
+  @IsInt()
+  @Min(0)
   skip = 0;
 }

@@ -17,8 +17,12 @@ export class QueryDataUseCase {
   async execute(query: QueryDataDto) {
     const filters = FilterBuilder.build(query);
 
-    const limit = Math.min(query.limit ?? 25, 200);
-    const skip = query.skip ?? 0;
+    // pagination defaults and constraints
+    const rawLimit = query.limit ?? 100;
+    const rawSkip = query.skip ?? 0;
+
+    const limit = Math.min(Math.max(Number(rawLimit) || 0, 1), 1000);
+    const skip = Math.max(Number(rawSkip) || 0, 0);
 
     const sort: Record<string, 1 | -1> = {};
     if (query.sortBy) sort[query.sortBy] = query.sortDir === 'asc' ? 1 : -1;

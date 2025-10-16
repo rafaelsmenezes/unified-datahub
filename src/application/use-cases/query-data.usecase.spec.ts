@@ -21,11 +21,11 @@ describe('QueryDataUseCase', () => {
 
     expect(repo.findFiltered).toHaveBeenCalledWith(
       {},
-      { limit: 25, skip: 0, sort: { createdAt: -1 } },
+      { limit: 100, skip: 0, sort: { createdAt: -1 } },
     );
     expect(repo.count).toHaveBeenCalledWith({});
     expect(result.items).toBe(items);
-    expect(result.meta).toEqual({ total: 10, limit: 25, skip: 0 });
+    expect(result.meta).toEqual({ total: 10, limit: 100, skip: 0 });
   });
 
   it('respects provided limit/skip/sort and sort direction', async () => {
@@ -48,5 +48,25 @@ describe('QueryDataUseCase', () => {
       { limit: 5, skip: 2, sort: { pricePerNight: 1 } },
     );
     expect(result.meta).toEqual({ total: 0, limit: 5, skip: 2 });
+  });
+
+  it('caps limit at 1000 and floors negative values', async () => {
+    const items = [];
+    const repo = makeRepo(items, 0);
+
+    const query = {
+      limit: 5000,
+      skip: -10,
+    } as any;
+
+    const usecase = new QueryDataUseCase(repo as any);
+
+    const result = await usecase.execute(query);
+
+    expect(repo.findFiltered).toHaveBeenCalledWith(
+      {},
+      { limit: 1000, skip: 0, sort: { createdAt: -1 } },
+    );
+    expect(result.meta).toEqual({ total: 0, limit: 1000, skip: 0 });
   });
 });

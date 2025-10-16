@@ -17,7 +17,7 @@ export class BaseMongoRepository<T> {
     filter: FilterQuery<T>,
     options?: { limit?: number; skip?: number; sort?: Record<string, 1 | -1> },
   ): Promise<T[]> {
-    const limit = Math.min(options?.limit ?? 25, 1000);
+    const limit = Math.min(options?.limit ?? 100, 1000);
     const skip = options?.skip ?? 0;
     const sort = options?.sort ?? { createdAt: -1 };
 

@@ -10,6 +10,7 @@ import {
   ApiOperation,
   ApiOkResponse,
   ApiNotFoundResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { QueryDataUseCase } from '../../application/use-cases/query-data.usecase';
 import { QueryDataDto } from './dto/query-data.dto';
@@ -25,9 +26,49 @@ export class ApiController {
 
   @Get()
   @ApiOperation({ summary: 'Query unified data' })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description:
+      'Page index (0-based). If provided, `pageSize` is used as limit',
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+    type: Number,
+    description: 'Page size; when used alone it maps to `limit`',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Maximum number of items to return (default 100, max 1000)',
+  })
+  @ApiQuery({
+    name: 'skip',
+    required: false,
+    type: Number,
+    description: 'Number of items to skip (default 0)',
+  })
   @ApiOkResponse({ description: 'Query results' })
-  async find(@Query() query: QueryDataDto) {
-    return this.queryDataUseCase.execute(query);
+  async find(@Query() query: QueryDataDto, @Query() rawQuery: any) {
+    // support aliases: page & pageSize
+    const adapted: any = { ...query };
+
+    if (rawQuery?.pageSize !== undefined && rawQuery?.page === undefined) {
+      // pageSize provided without page -> interpret as limit
+      adapted.limit = Number(rawQuery.pageSize);
+    }
+
+    if (rawQuery?.page !== undefined) {
+      const page = Number(rawQuery.page) || 0;
+      const pageSize = Number(rawQuery.pageSize) || adapted.limit || 100;
+      adapted.limit = pageSize;
+      adapted.skip = Math.max(0, page * pageSize);
+    }
+
+    return this.queryDataUseCase.execute(adapted);
   }
 
   @Get(':id')

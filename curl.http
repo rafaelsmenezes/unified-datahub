@@ -1,7 +1,7 @@
 @base = http://localhost:3000
 
 ### Get first page (25)
-GET {{base}}/api/data?limit=500
+GET {{base}}/api/data?limit=3&page=1
 Accept: application/json
 
 ### Search Paris available with price range

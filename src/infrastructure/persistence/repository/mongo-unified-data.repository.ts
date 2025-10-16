@@ -61,7 +61,7 @@ export class MongoUnifiedDataRepository
       projection?: Record<string, 0 | 1>;
     },
   ): Promise<UnifiedData[]> {
-    const limit = Math.min(options?.limit ?? 25, 1000);
+    const limit = Math.min(options?.limit ?? 100, 1000);
     const skip = options?.skip ?? 0;
     const sort = options?.sort ?? { createdAt: -1 };
     const projection = options?.projection ?? {};
