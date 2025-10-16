@@ -17,7 +17,6 @@ export class QueryDataUseCase {
   async execute(query: QueryDataDto) {
     const filters = FilterBuilder.build(query);
 
-    // pagination defaults and constraints
     const rawLimit = query.limit ?? 100;
     const rawSkip = query.skip ?? 0;
 

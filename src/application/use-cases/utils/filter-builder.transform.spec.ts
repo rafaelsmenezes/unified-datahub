@@ -11,7 +11,6 @@ describe('QueryDataDto transform + FilterBuilder', () => {
       city: 'Paris',
     } as any;
 
-    // simulate Nest ValidationPipe transform
     const pipe = new ValidationPipe({ transform: true });
     const transformed = (await pipe.transform(raw, {
       type: 'query',
