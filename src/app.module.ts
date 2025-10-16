@@ -4,10 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { IngestionModule } from './infrastructure/ingestion/ingestion.module';
 import { PersistenceModule } from './infrastructure/persistence/persistence.module';
-
-import { ApiController } from './interfaces/rest/api.controller';
-import { AdminController } from './interfaces/rest/admin.controller';
-
 import { IngestionUseCase } from './application/use-cases/ingestion.usecase';
 import { QueryDataUseCase } from './application/use-cases/query-data.usecase';
 import { GetDataByIdUseCase } from './application/use-cases/get-data-by-id.usecase';
@@ -16,6 +12,7 @@ import {
   IIngestionServiceToken,
 } from './domain/ingestion/ingestion.service.interface';
 import { registerSources } from './sources.config';
+import { InterfacesModule } from './interfaces/interfaces.module';
 
 @Module({
   imports: [
@@ -23,8 +20,8 @@ import { registerSources } from './sources.config';
     MongooseModule.forRoot(String(process.env.MONGO_URI)),
     PersistenceModule,
     IngestionModule,
+    InterfacesModule,
   ],
-  controllers: [ApiController, AdminController],
   providers: [
     ConfigService,
     IngestionUseCase,
