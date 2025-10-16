@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { IngestionService } from './ingestion.service';
 import { BatchSaverService } from './batch/batch-saver.service';
 import { StreamGeneratorService } from './stream/stream-generator.service';
+import { IngestionScheduler } from '../scheduler/ingestion.scheduler';
 import { IBatchSaverServiceToken } from 'src/domain/ingestion/batch-saver.interface';
 import { IIngestionServiceToken } from 'src/domain/ingestion/ingestion.service.interface';
 import { IStreamGeneratorServiceToken } from 'src/domain/ingestion/stream-generator.interface';
@@ -24,6 +25,7 @@ import { HttpModule } from '../http/http.module';
       provide: IStreamGeneratorServiceToken,
       useClass: StreamGeneratorService,
     },
+    IngestionScheduler,
   ],
   exports: [
     IIngestionServiceToken,

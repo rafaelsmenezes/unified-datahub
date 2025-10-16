@@ -36,9 +36,10 @@ export class AppModule implements OnModuleInit {
   constructor(
     @Inject(IIngestionServiceToken)
     private readonly ingestionService: IIngestionService,
+    private readonly configService: ConfigService,
   ) {}
 
   onModuleInit() {
-    registerSources(this.ingestionService, new ConfigService());
+    registerSources(this.ingestionService, this.configService);
   }
 }
