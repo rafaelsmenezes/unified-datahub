@@ -121,10 +121,8 @@ describe('ApiController (integration)', () => {
       .expect(200);
 
     expect(capturedFilters.$or).toBeInstanceOf(Array);
-    // should include name or city or raw.description or raw.title entries
     expect(Array.isArray(capturedFilters.$or)).toBe(true);
     expect(capturedFilters.$or.length).toBeGreaterThan(0);
-    // At least one clause should target a string field with regex
     const hasRegexClause = capturedFilters.$or.some((clause: any) => {
       const val = Object.values(clause)[0] as any;
       return typeof val === 'object' && val !== null && '$regex' in val;
@@ -149,5 +147,27 @@ describe('ApiController (integration)', () => {
     expect(capturedOptions.sort).toEqual({ pricePerNight: 1 });
     expect(capturedOptions.limit).toBe(10);
     expect(capturedOptions.skip).toBe(20);
+  });
+
+  it('throw 400 if sortDir is invalid', async () => {
+    await request(app.getHttpServer())
+      .get('/api/data')
+      .query({
+        sortBy: 'pricePerNight',
+        sortDir: 'invalidDir',
+      })
+      .expect(400);
+  });
+
+  it('uses defaults when no query params provided', async () => {
+    capturedFilters = null;
+    capturedOptions = null;
+    await request(app.getHttpServer()).get('/api/data').expect(200);
+
+    expect(capturedFilters).toEqual({});
+    expect(capturedOptions).toBeDefined();
+    expect(capturedOptions.limit).toBe(25);
+    expect(capturedOptions.skip).toBe(0);
+    expect(capturedOptions.sort).toEqual({ createdAt: -1 });
   });
 });
