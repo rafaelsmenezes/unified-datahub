@@ -169,7 +169,7 @@ This solution satisfies all required criteria of the technical challenge:
 * Performance and memory usage are carefully considered.
 * Adding a new source is trivial via mapper + registration.
 
-Future improvements include ingestion parallelism, structured logging, and dynamic filter builder for new raw fields.
+> 💡 **Note:** Future improvements could include ingestion parallelism, structured logging, dynamic filter builder for new `raw` fields, caching, and advanced full-text search. These are optional enhancements and not required for delivery. Those improvements could be found in the doc folder.
 
 ---
 
