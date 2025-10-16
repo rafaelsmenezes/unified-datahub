@@ -86,20 +86,29 @@ MONGODB_URI=mongodb://localhost:27017/buenro
 PORT=3000
 SOURCE1_URL=<your source1 JSON URL>
 SOURCE2_URL=<your source2 JSON URL>
-INGESTION_CRON=0 8 * * *
+INGESTION_CRON=*/5 * * * * # Cron job runs every 5 minutes
 ```
 
 ### Run
 
+Start MongoDB via Docker
+```bash
+docker compose up -d
+```
+Run in Development Mode
 ```bash
 npm run start:dev
 ```
-
-To ingest data:
-
+Build and Run Production Mode
+```bash
+npm run build
+npm start
+```
+Trigger Manual Ingestion
 ```
 POST /api/admin/ingest
 ```
+The cron job will automatically ingest data based on the INGESTION_CRON schedule (every 5 minutes in this config).
 
 ---
 
