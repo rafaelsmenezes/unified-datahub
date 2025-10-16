@@ -1,4 +1,4 @@
-import { IngestionUseCase } from '../../../dist/application/use-cases/ingestion.usecase';
+import { IngestionUseCase } from './ingestion.usecase';
 
 describe('IngestionUseCase', () => {
   it('calls ingestionService.ingestAll once', async () => {
