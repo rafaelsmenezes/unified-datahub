@@ -1,5 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { IngestionSource } from './interfaces/ingestion-source.interface';
+import { INGESTION_SOURCES_TOKEN } from '../sources/sources.module';
 import {
   IStreamGeneratorService,
   IStreamGeneratorServiceToken,
@@ -12,19 +14,20 @@ import {
 
 @Injectable()
 export class IngestionService implements IIngestionService {
-  private readonly sources: IngestionSource[] = [];
   private readonly logger = new Logger(IngestionService.name);
-  private static readonly BATCH_SIZE = 5000;
+  private readonly batchSize: number;
 
   constructor(
+    @Inject(INGESTION_SOURCES_TOKEN)
+    private readonly sources: IngestionSource[],
     @Inject(IStreamGeneratorServiceToken)
     private readonly streamGenerator: IStreamGeneratorService,
     @Inject(IBatchSaverServiceToken)
     private readonly batchSaver: IBatchSaverService,
-  ) {}
-
-  registerSource(source: IngestionSource): void {
-    this.sources.push(source);
+    private readonly configService: ConfigService,
+  ) {
+    this.batchSize =
+      this.configService.get<number>('ingestion.batchSize') || 5000;
   }
 
   async ingestAll(): Promise<void> {
@@ -43,7 +46,7 @@ export class IngestionService implements IIngestionService {
       const batchedStream = this.streamGenerator.fetch(
         url,
         mapper,
-        IngestionService.BATCH_SIZE,
+        this.batchSize,
       );
       await this.batchSaver.saveBatches(batchedStream);
       this.logger.log(`✅ Finished ingestion for ${name}`);

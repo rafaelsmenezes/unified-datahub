@@ -1,5 +1,7 @@
 import { Test } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { IngestionService } from './ingestion.service';
+import { INGESTION_SOURCES_TOKEN } from '../sources/sources.module';
 import {
   IStreamGeneratorServiceToken,
   IStreamGeneratorService,
@@ -19,10 +21,21 @@ describe('IngestionService', () => {
     );
 
     const saveBatches = jest.fn().mockResolvedValue(undefined);
+    const mapper = { map: (r: unknown) => r };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
         IngestionService,
+        {
+          provide: INGESTION_SOURCES_TOKEN,
+          useValue: [
+            {
+              name: 't',
+              url: 'u',
+              mapper,
+            },
+          ],
+        },
         {
           provide: IStreamGeneratorServiceToken,
           useValue: { fetch } as IStreamGeneratorService,
@@ -31,17 +44,17 @@ describe('IngestionService', () => {
           provide: IBatchSaverServiceToken,
           useValue: { saveBatches } as IBatchSaverService,
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue(5000),
+          },
+        },
       ],
     }).compile();
 
     const ingestion = moduleRef.get(IngestionService);
 
-    const mapper = { map: (r: unknown) => r };
-    ingestion.registerSource({
-      name: 't',
-      url: 'u',
-      mapper,
-    });
     await ingestion.ingestAll();
 
     expect(fetch).toHaveBeenCalledWith(
@@ -57,10 +70,21 @@ describe('IngestionService', () => {
       throw new Error('boom');
     });
     const saveBatches = jest.fn().mockResolvedValue(undefined);
+    const mapper2 = { map: (r: unknown) => r };
 
     const moduleRef = await Test.createTestingModule({
       providers: [
         IngestionService,
+        {
+          provide: INGESTION_SOURCES_TOKEN,
+          useValue: [
+            {
+              name: 'fail',
+              url: 'u',
+              mapper: mapper2,
+            },
+          ],
+        },
         {
           provide: IStreamGeneratorServiceToken,
           useValue: { fetch } as IStreamGeneratorService,
@@ -69,16 +93,16 @@ describe('IngestionService', () => {
           provide: IBatchSaverServiceToken,
           useValue: { saveBatches } as IBatchSaverService,
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue(5000),
+          },
+        },
       ],
     }).compile();
 
     const ingestion = moduleRef.get(IngestionService);
-    const mapper2 = { map: (r: unknown) => r };
-    ingestion.registerSource({
-      name: 'fail',
-      url: 'u',
-      mapper: mapper2,
-    });
 
     await ingestion.ingestAll();
 
