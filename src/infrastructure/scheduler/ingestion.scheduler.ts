@@ -1,36 +1,21 @@
-import { Inject, Injectable, Logger, OnModuleInit } from '@nestjs/common';
-import { CronJob } from 'cron';
-import { ConfigService } from '@nestjs/config';
-import {
-  IIngestionService,
-  IIngestionServiceToken,
-} from 'src/domain/ingestion/ingestion.service.interface';
+import { Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
+import { IngestionUseCase } from 'src/application/use-cases/ingestion.usecase';
 
 @Injectable()
-export class IngestionScheduler implements OnModuleInit {
+export class IngestionScheduler {
   private readonly logger = new Logger(IngestionScheduler.name);
 
-  constructor(
-    @Inject(IIngestionServiceToken)
-    private readonly ingestionService: IIngestionService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly ingestionUseCase: IngestionUseCase) {}
 
-  onModuleInit() {
-    const cronExpression =
-      this.configService.get<string>('INGESTION_CRON') || '0 * * * *';
-
-    const job = new CronJob(cronExpression, async () => {
-      this.logger.log('Starting scheduled ingestion...');
-      try {
-        await this.ingestionService.ingestAll();
-        this.logger.log('Scheduled ingestion completed successfully.');
-      } catch (err) {
-        this.logger.error('Error during ingestion', err);
-      }
-    });
-
-    job.start();
-    this.logger.log(`Ingestion cron job started: ${cronExpression}`);
+  @Cron('0 * * * *') // Runs every hour
+  async handleScheduledIngestion() {
+    this.logger.log('Starting scheduled ingestion...');
+    try {
+      await this.ingestionUseCase.execute();
+      this.logger.log('Scheduled ingestion completed successfully.');
+    } catch (err) {
+      this.logger.error('Error during scheduled ingestion', err);
+    }
   }
 }

@@ -1,3 +1,4 @@
+import { Injectable } from '@nestjs/common';
 import { UnifiedData } from '../../../domain/entities/unified-data.entity';
 import { SourceMapper } from '../interfaces/mapper.interface';
 import {
@@ -7,6 +8,7 @@ import {
   asString,
 } from './utils/mapper.utils';
 
+@Injectable()
 export class Source2Mapper implements SourceMapper {
   map(record: unknown): UnifiedData {
     const rec = record as Record<string, unknown>;

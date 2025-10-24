@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ScheduleModule } from '@nestjs/schedule';
 import { IngestionService } from './ingestion.service';
 import { BatchSaverService } from './batch/batch-saver.service';
 import { StreamGeneratorService } from './stream/stream-generator.service';
@@ -9,9 +10,18 @@ import { IStreamGeneratorServiceToken } from 'src/domain/ingestion/stream-genera
 import { PersistenceModule } from '../persistence/persistence.module';
 import { HttpModule } from '../http/http.module';
 import { ConfigModule } from '@nestjs/config';
+import { SourcesModule } from '../sources/sources.module';
+import { ApplicationModule } from 'src/application/application.module';
 
 @Module({
-  imports: [ConfigModule, PersistenceModule, HttpModule],
+  imports: [
+    ConfigModule,
+    ScheduleModule.forRoot(),
+    PersistenceModule,
+    HttpModule,
+    SourcesModule,
+    ApplicationModule,
+  ],
 
   providers: [
     {
