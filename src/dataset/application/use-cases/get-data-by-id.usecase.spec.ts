@@ -1,6 +1,6 @@
 import { NotFoundException } from '@nestjs/common';
 import { GetDataByIdUseCase } from './get-data-by-id.usecase';
-import { UnifiedData } from '../../ingestion/domain/entities/unified-data.entity';
+import { UnifiedData } from '../../../ingestion/domain/entities/unified-data.entity';
 
 describe('GetDataByIdUseCase', () => {
   const makeRepository = (item: UnifiedData | null) => ({

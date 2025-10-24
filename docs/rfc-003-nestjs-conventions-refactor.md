@@ -1,42 +1,42 @@
-# RFC-003: Refatoração para Convenções NestJS
+# RFC-003: NestJS Conventions Refactoring
 
-**Data:** 24 de Outubro de 2025  
-**Autor:** Rafael Silva Menezes  
-**Status:** Implementado  
+**Date:** October 24, 2025  
+**Author:** Rafael Silva Menezes  
+**Status:** Implemented  
 **Branch:** `refactor/nestjs-conventions`
 
 ---
 
-## 📋 Contexto
+## 📋 Context
 
-Durante a evolução do projeto, identificamos oportunidades de melhorar a aderência às **convenções e padrões idiomáticos do NestJS**.
+During the project evolution, we identified opportunities to improve adherence to **NestJS conventions and idiomatic patterns**.
 
-Este RFC documenta a refatoração completa do projeto para alinhar com as melhores práticas do framework.
-
----
-
-## 🎯 Objetivos da Refatoração
-
-1. **Dependency Injection 100% via NestJS** - Eliminar instanciações manuais
-2. **Module Organization** - AppModule minimalista, lógica em feature modules
-3. **Configuration Management** - ConfigModule com registerAs pattern
-4. **Native Features** - Usar soluções nativas do NestJS (Schedule, Pipes, etc)
-5. **Clean Controllers** - Lógica de transformação em Pipes/Interceptors
-6. **Type Safety** - Symbols ao invés de strings para injection tokens
+This RFC documents the complete refactoring of the project to align with framework best practices.
 
 ---
 
-## 🔄 Principais Mudanças
+## 🎯 Refactoring Objectives
 
-### 1. **DatabaseModule** - Configuração Assíncrona
+1. **100% Dependency Injection via NestJS** - Eliminate manual instantiations
+2. **Module Organization** - Minimalist AppModule, logic in feature modules
+3. **Configuration Management** - ConfigModule with registerAs pattern
+4. **Native Features** - Use native NestJS solutions (Schedule, Pipes, etc)
+5. **Clean Controllers** - Transformation logic in Pipes/Interceptors
+6. **Type Safety** - Symbols instead of strings for injection tokens
 
-**Antes:**
+---
+
+## 🔄 Main Changes
+
+### 1. **DatabaseModule** - Async Configuration
+
+**Before:**
 ```typescript
 // app.module.ts
 MongooseModule.forRoot(String(process.env.MONGO_URI))
 ```
 
-**Depois:**
+**After:**
 ```typescript
 // infrastructure/database/database.module.ts
 @Module({
@@ -57,19 +57,19 @@ export class DatabaseModule {}
 })
 ```
 
-**Benefícios:**
-- ✅ Encapsulamento da configuração do banco
-- ✅ Testável e mockável
-- ✅ Usa ConfigService ao invés de process.env direto
+**Benefits:**
+- ✅ Database configuration encapsulation
+- ✅ Testable and mockable
+- ✅ Uses ConfigService instead of direct process.env
 - ✅ Type-safe
 
 ---
 
-### 2. **SourcesModule** - Dependency Injection de Sources
+### 2. **SourcesModule** - Dependency Injection of Sources
 
-**Antes:**
+**Before:**
 ```typescript
-// sources.config.ts (função manual)
+// sources.config.ts (manual function)
 export function registerSources(
   ingestionService: IIngestionService,
   configService: ConfigService,
@@ -77,7 +77,7 @@ export function registerSources(
   ingestionService.registerSource({
     name: 'source1',
     url: getRequiredEnv('SOURCE1_URL', configService),
-    mapper: new Source1Mapper(), // ❌ Instanciação manual
+    mapper: new Source1Mapper(), // ❌ Manual instantiation
   });
 }
 
@@ -89,7 +89,7 @@ export class AppModule implements OnModuleInit {
 }
 ```
 
-**Depois:**
+**After:**
 ```typescript
 // infrastructure/sources/sources.module.ts
 @Module({
@@ -108,12 +108,12 @@ export class AppModule implements OnModuleInit {
           {
             name: 'source1',
             url: configService.get<string>('sources.source1.url'),
-            mapper: source1Mapper, // ✅ Injetado
+            mapper: source1Mapper, // ✅ Injected
           },
           {
             name: 'source2',
             url: configService.get<string>('sources.source2.url'),
-            mapper: source2Mapper, // ✅ Injetado
+            mapper: source2Mapper, // ✅ Injected
           },
         ];
       },
@@ -124,25 +124,25 @@ export class AppModule implements OnModuleInit {
 })
 export class SourcesModule {}
 
-// Mappers agora são @Injectable()
+// Mappers are now @Injectable()
 @Injectable()
 export class Source1Mapper implements SourceMapper { ... }
 ```
 
-**Benefícios:**
-- ✅ Mappers testáveis isoladamente
-- ✅ Sources injetadas via DI
-- ✅ Sem lógica no AppModule
-- ✅ Facilita adicionar novos sources
-- ✅ Token exportável e reutilizável
+**Benefits:**
+- ✅ Mappers testable in isolation
+- ✅ Sources injected via DI
+- ✅ No logic in AppModule
+- ✅ Easy to add new sources
+- ✅ Token exportable and reusable
 
 ---
 
 ### 3. **IngestionScheduler** - @Cron Decorator
 
-**Antes:**
+**Before:**
 ```typescript
-import { CronJob } from 'cron'; // ❌ Biblioteca externa
+import { CronJob } from 'cron'; // ❌ External library
 
 @Injectable()
 export class IngestionScheduler implements OnModuleInit {
@@ -158,7 +158,7 @@ export class IngestionScheduler implements OnModuleInit {
 }
 ```
 
-**Depois:**
+**After:**
 ```typescript
 import { Cron } from '@nestjs/schedule'; // ✅ Native NestJS
 
@@ -166,47 +166,47 @@ import { Cron } from '@nestjs/schedule'; // ✅ Native NestJS
 export class IngestionScheduler {
   constructor(private readonly ingestionUseCase: IngestionUseCase) {}
 
-  @Cron('0 * * * *') // ✅ Decorator nativo
+  @Cron('0 * * * *') // ✅ Native decorator
   async handleScheduledIngestion() {
     this.logger.log('Starting scheduled ingestion...');
     await this.ingestionUseCase.execute();
   }
 }
 
-// No módulo
+// In module
 @Module({
-  imports: [ScheduleModule.forRoot()], // ✅ Habilita scheduling
+  imports: [ScheduleModule.forRoot()], // ✅ Enable scheduling
   providers: [IngestionScheduler],
 })
 ```
 
-**Benefícios:**
-- ✅ Usa feature nativa do NestJS
-- ✅ Código mais declarativo
-- ✅ Testável (decorator pode ser ignorado em testes)
-- ✅ Menos dependências externas
+**Benefits:**
+- ✅ Uses native NestJS feature
+- ✅ More declarative code
+- ✅ Testable (decorator can be ignored in tests)
+- ✅ Fewer external dependencies
 
 ---
 
-### 4. **QueryDataTransformPipe** - Controllers Limpos
+### 4. **QueryDataTransformPipe** - Clean Controllers
 
-**Antes:**
+**Before:**
 ```typescript
 @Controller('data')
 export class DataController {
   @Get()
   async find(@Query() query: QueryDataDto, @Query() rawQuery: any) { // ❌
-    const adapted = this.adaptQuery(query, rawQuery); // ❌ Lógica no controller
+    const adapted = this.adaptQuery(query, rawQuery); // ❌ Logic in controller
     return this.queryDataUseCase.execute(adapted);
   }
 
   private adaptQuery(query: QueryDataDto, rawQuery: any): QueryDataDto {
-    // ... lógica complexa de transformação
+    // ... complex transformation logic
   }
 }
 ```
 
-**Depois:**
+**After:**
 ```typescript
 // interfaces/rest/pipes/query-data-transform.pipe.ts
 @Injectable()
@@ -229,27 +229,27 @@ export class QueryDataTransformPipe implements PipeTransform {
   }
 }
 
-// Controller (limpo!)
+// Controller (clean!)
 @Controller('data')
 export class DataController {
   @Get()
-  async find(@Query(QueryDataTransformPipe) query: QueryDataDto) { // ✅ Pipe faz transformação
+  async find(@Query(QueryDataTransformPipe) query: QueryDataDto) { // ✅ Pipe does transformation
     return this.queryDataUseCase.execute(query);
   }
 }
 ```
 
-**Benefícios:**
-- ✅ Controller com single responsibility
-- ✅ Pipe reutilizável
-- ✅ Testável isoladamente
-- ✅ Segue padrão NestJS
+**Benefits:**
+- ✅ Controller with single responsibility
+- ✅ Reusable pipe
+- ✅ Testable in isolation
+- ✅ Follows NestJS pattern
 
 ---
 
-### 5. **AppModule Minimalista**
+### 5. **Minimalist AppModule**
 
-**Antes:**
+**Before:**
 ```typescript
 @Module({
   imports: [
@@ -261,19 +261,19 @@ export class DataController {
   ],
   providers: [
     ConfigService,
-    IngestionUseCase, // ❌ Use cases no AppModule
+    IngestionUseCase, // ❌ Use cases in AppModule
     QueryDataUseCase,
     GetDataByIdUseCase,
   ],
 })
-export class AppModule implements OnModuleInit { // ❌ Lógica de negócio
+export class AppModule implements OnModuleInit { // ❌ Business logic
   onModuleInit() {
     registerSources(this.ingestionService, this.configService);
   }
 }
 ```
 
-**Depois:**
+**After:**
 ```typescript
 @Module({
   imports: [
@@ -281,31 +281,31 @@ export class AppModule implements OnModuleInit { // ❌ Lógica de negócio
       isGlobal: true,
       load: [databaseConfig, sourcesConfig, ingestionConfig], // ✅ Config files
     }),
-    DatabaseModule, // ✅ Módulo dedicado
+    DatabaseModule, // ✅ Dedicated module
     IngestionModule,
     InterfacesModule,
   ],
 })
-export class AppModule {} // ✅ Sem lógica, apenas composição
+export class AppModule {} // ✅ No logic, just composition
 ```
 
-**Benefícios:**
-- ✅ AppModule como orquestrador
-- ✅ Sem lógica de negócio
-- ✅ Configurações centralizadas
-- ✅ Mais fácil de entender
+**Benefits:**
+- ✅ AppModule as orchestrator
+- ✅ No business logic
+- ✅ Centralized configurations
+- ✅ Easier to understand
 
 ---
 
 ### 6. **Configuration Files Pattern**
 
-**Antes:**
+**Before:**
 ```typescript
-process.env.MONGO_URI // ❌ Direto no código
+process.env.MONGO_URI // ❌ Direct in code
 process.env.SOURCE1_URL
 ```
 
-**Depois:**
+**After:**
 ```typescript
 // config/database.config.ts
 export default registerAs('database', () => ({
@@ -330,59 +330,59 @@ export default registerAs('ingestion', () => ({
   cronExpression: process.env.INGESTION_CRON || '0 * * * *',
 }));
 
-// Uso
+// Usage
 configService.get<string>('database.uri')
 configService.get<number>('ingestion.batchSize')
 ```
 
-**Benefícios:**
-- ✅ Configurações tipadas e centralizadas
-- ✅ Fácil de testar
-- ✅ Namespace prevent collisions
-- ✅ Default values em um só lugar
+**Benefits:**
+- ✅ Typed and centralized configurations
+- ✅ Easy to test
+- ✅ Namespace prevents collisions
+- ✅ Default values in one place
 
 ---
 
-## 📊 Comparação: Antes vs Depois
+## 📊 Comparison: Before vs After
 
-| Aspecto | Antes | Depois |
+| Aspect | Before | After |
 |---------|-------|--------|
-| **Instanciação Manual** | `new Source1Mapper()` | `@Injectable()` + DI |
+| **Manual Instantiation** | `new Source1Mapper()` | `@Injectable()` + DI |
 | **Source Registration** | `AppModule.onModuleInit()` | `SourcesModule` factory |
 | **Scheduler** | `cron` library manual | `@Cron` decorator |
-| **Controller Logic** | Método privado | `Pipe` dedicado |
-| **Config** | `process.env` direto | `ConfigModule.registerAs()` |
-| **AppModule** | 40 linhas + lógica | 15 linhas, apenas imports |
-| **Database Config** | Inline no AppModule | `DatabaseModule` dedicado |
+| **Controller Logic** | Private method | Dedicated `Pipe` |
+| **Config** | Direct `process.env` | `ConfigModule.registerAs()` |
+| **AppModule** | 40 lines + logic | 15 lines, imports only |
+| **Database Config** | Inline in AppModule | Dedicated `DatabaseModule` |
 | **Tokens** | Strings | Symbols |
 
 ---
 
-## ✅ Checklist de Convenções NestJS
+## ✅ NestJS Conventions Checklist
 
-- [x] Dependency Injection completo (sem `new`)
-- [x] Modules com single responsibility
-- [x] ConfigModule com `registerAs` pattern
-- [x] Dynamic modules com `forRoot/forRootAsync`
-- [x] Decorators nativos (`@Cron`, `@Injectable`)
-- [x] Pipes para transformação
-- [x] AppModule minimalista
-- [x] Feature modules exportando tokens
-- [x] Symbols ao invés de strings
-- [x] ScheduleModule do NestJS
-
----
-
-## 🧪 Impacto nos Testes
-
-**Testes Atualizados:**
-- `ingestion.service.spec.ts` - Agora injeta sources via `INGESTION_SOURCES_TOKEN`
-
-**Todos os testes continuam passando** ✅
+- [x] Complete Dependency Injection (no `new`)
+- [x] Modules with single responsibility
+- [x] ConfigModule with `registerAs` pattern
+- [x] Dynamic modules with `forRoot/forRootAsync`
+- [x] Native decorators (`@Cron`, `@Injectable`)
+- [x] Pipes for transformation
+- [x] Minimalist AppModule
+- [x] Feature modules exporting tokens
+- [x] Symbols instead of strings
+- [x] NestJS ScheduleModule
 
 ---
 
-## 📚 Referências
+## 🧪 Impact on Tests
+
+**Updated Tests:**
+- `ingestion.service.spec.ts` - Now injects sources via `INGESTION_SOURCES_TOKEN`
+
+**All tests continue passing** ✅
+
+---
+
+## 📚 References
 
 1. [NestJS Modules](https://docs.nestjs.com/modules)
 2. [NestJS Dependency Injection](https://docs.nestjs.com/fundamentals/custom-providers)
@@ -392,35 +392,35 @@ configService.get<number>('ingestion.batchSize')
 
 ---
 
-## 🚀 Como Rodar
+## 🚀 How to Run
 
 ```bash
-# Instalar dependências
+# Install dependencies
 npm install
 
-# Rodar testes
+# Run tests
 npm test
 
-# Rodar em dev
+# Run in dev
 npm run start:dev
 ```
 
 ---
 
-## 🎯 Conclusão
+## 🎯 Conclusion
 
-Esta refatoração transforma o projeto de uma implementação tecnicamente correta de **Clean Architecture** para uma implementação que **combina Clean Architecture com as convenções idiomáticas do NestJS**.
+This refactoring transforms the project from a technically correct implementation of **Clean Architecture** to an implementation that **combines Clean Architecture with NestJS idiomatic conventions**.
 
-**Principais aprendizados:**
-1. NestJS é opinionated - tem uma forma específica de fazer as coisas
-2. Use features nativas quando disponíveis
-3. DI é central - tudo deve ser injetável
-4. Modules devem ter responsabilidades claras
-5. AppModule é apenas orquestrador
+**Key learnings:**
+1. NestJS is opinionated - has a specific way of doing things
+2. Use native features when available
+3. DI is central - everything should be injectable
+4. Modules should have clear responsibilities
+5. AppModule is just an orchestrator
 
-**Resultado:** Código mais NestJS-idiomático, maintainable e alinhado com expectativas de empresas que usam o framework.
+**Result:** More NestJS-idiomatic, maintainable code aligned with expectations of companies using the framework.
 
 ---
 
-**Autor:** Rafael Silva Menezes  
+**Author:** Rafael Silva Menezes  
 **GitHub:** [@rafaelsmenezes](https://github.com/rafaelsmenezes)

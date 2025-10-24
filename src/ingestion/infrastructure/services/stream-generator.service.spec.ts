@@ -1,6 +1,6 @@
 import { Readable } from 'stream';
 import { StreamGeneratorService } from './stream-generator.service';
-import { IHttpClientService } from '../http/http-client.interface';
+import { IHttpClientService } from '../../../shared/infrastructure/http/http-client.interface';
 
 describe('StreamGeneratorService', () => {
   test('fetch produces batches using pipeline', async () => {

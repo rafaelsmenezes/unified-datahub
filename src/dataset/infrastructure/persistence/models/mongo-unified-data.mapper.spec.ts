@@ -1,5 +1,5 @@
 import { MongoUnifiedDataMapper } from './mongo-unified-data.mapper';
-import { UnifiedData } from '../../../ingestion/domain/entities/unified-data.entity';
+import { UnifiedData } from '../../../../ingestion/domain/entities/unified-data.entity';
 
 describe('MongoUnifiedDataMapper', () => {
   describe('toDomain', () => {

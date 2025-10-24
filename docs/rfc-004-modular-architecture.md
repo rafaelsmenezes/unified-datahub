@@ -1,84 +1,89 @@
 # RFC-004: Modular Architecture - Vertical Slice Organization
 
-**Data:** 24 de Outubro de 2025  
-**Autor:** Rafael Silva Menezes  
-**Status:** Em Implementação  
+**Date:** October 24, 2025  
+**Author:** Rafael Silva Menezes  
+**Status:** Implemented  
 **Branch:** `refactor/modular-architecture`
 
 ---
 
-## 📋 Contexto
+## 📋 Context
 
-Atualmente o projeto está organizado por **camadas técnicas** (horizontal):
+Currently, the project is organized by **technical layers** (horizontal):
 
-```
+```text
 src/
-├── domain/           # TODAS as entidades
-├── application/      # TODOS os use cases
-├── infrastructure/   # TODAS as implementações
-└── interfaces/       # TODOS os controllers
+├── domain/           # ALL entities
+├── application/      # ALL use cases
+├── infrastructure/   # ALL implementations
+└── interfaces/       # ALL controllers
 ```
 
-Esta organização dificulta navegação e escalabilidade à medida que o projeto cresce.
+This organization makes navigation and scalability difficult as the project grows.
 
 ---
 
-## 🎯 Objetivo
+## 🎯 Objective
 
-Reorganizar o código em **módulos funcionais** (vertical slices), seguindo convenções do NestJS e princípios de Domain-Driven Design.
+Reorganize the code into **functional modules** (vertical slices), following NestJS conventions and Domain-Driven Design principles.
 
-```
+```text
 src/
-├── ingestion/        # Módulo de ingestão
+├── ingestion/        # Ingestion module
 │   ├── domain/
 │   ├── application/
 │   ├── infrastructure/
 │   └── interfaces/
 │
-├── dataset/          # Módulo de consulta
+├── dataset/          # Query module
 │   ├── domain/
 │   ├── application/
 │   ├── infrastructure/
 │   └── interfaces/
 │
-└── shared/           # Código compartilhado
+└── shared/           # Shared code
     ├── infrastructure/
     └── config/
 ```
 
 ---
 
-## ✅ Benefícios
+## ✅ Benefits
 
-### **Alta Coesão**
-- Todo código relacionado a "ingestion" fica junto
-- Não precisa navegar entre 4 pastas diferentes
+### High Cohesion
 
-### **Bounded Contexts (DDD)**
-- Cada módulo representa um contexto delimitado
-- Ingestion e Dataset têm responsabilidades distintas
+- All code related to "ingestion" stays together
+- No need to navigate between 4 different folders
 
-### **Escalabilidade**
-- Mais fácil navegar em projetos grandes
-- Cada módulo pode evoluir independentemente
+### Bounded Contexts (DDD)
 
-### **Microservices-Ready**
-- Se precisar quebrar em serviços, já está organizado
-- Migração natural para arquitetura distribuída
+- Each module represents a bounded context
+- Ingestion and Dataset have distinct responsibilities
 
-### **NestJS Convention**
-- É a forma recomendada pelo framework
+### Scalability
+
+- Easier to navigate in large projects
+- Each module can evolve independently
+
+### Microservices-Ready
+
+- If you need to break into services, it's already organized
+- Natural migration to distributed architecture
+
+### NestJS Convention
+
+- It's the recommended way by the framework
 - Feature-based organization
 
 ---
 
-## 🏗️ Estrutura Proposta
+## 🏗️ Proposed Structure
 
-### **1. Ingestion Module** (Ingestão de Dados)
+### 1. Ingestion Module (Data Ingestion)
 
-**Responsabilidade:** Buscar dados de fontes externas e persistir
+**Responsibility:** Fetch data from external sources and persist
 
-```
+```text
 src/ingestion/
 ├── domain/
 │   ├── entities/
@@ -110,15 +115,15 @@ src/ingestion/
 └── ingestion.module.ts
 ```
 
-### **2. Dataset Module** (Consulta de Dados)
+### 2. Dataset Module (Data Query)
 
-**Responsabilidade:** Consultar e retornar dados armazenados
+**Responsibility:** Query and return stored data
 
-```
+```text
 src/dataset/
 ├── domain/
 │   ├── entities/
-│   │   └── unified-data.entity.ts  (ou reusar de ingestion)
+│   │   └── unified-data.entity.ts  (or reuse from ingestion)
 │   └── repositories/
 │       └── unified-data.repository.interface.ts
 │
@@ -145,11 +150,11 @@ src/dataset/
 └── dataset.module.ts
 ```
 
-### **3. Shared Module** (Código Compartilhado)
+### 3. Shared Module (Shared Code)
 
-**Responsabilidade:** Infraestrutura e configuração comum
+**Responsibility:** Common infrastructure and configuration
 
-```
+```text
 src/shared/
 ├── infrastructure/
 │   ├── http/
@@ -167,29 +172,31 @@ src/shared/
 
 ---
 
-## 📊 Comparação
+## 📊 Comparison
 
-| Aspecto | Por Camadas (Atual) | Por Módulos (Proposto) |
-|---------|---------------------|------------------------|
-| **Navegação** | Difícil (4 pastas) | Fácil (tudo junto) |
-| **Coesão** | Baixa | Alta |
-| **Escalabilidade** | Dificulta | Facilita |
-| **Microservices** | Difícil separar | Fácil separar |
-| **NestJS** | Não convencional | Convencional |
-| **DDD** | Não suporta bem | Suporta bounded contexts |
+| Aspect            | By Layers (Before)       | By Modules (After)              |
+| ----------------- | ------------------------ | ------------------------------- |
+| **Navigation**    | Difficult (4 folders)    | Easy (everything together)      |
+| **Cohesion**      | Low                      | High                            |
+| **Scalability**   | Makes it difficult       | Facilitates                     |
+| **Microservices** | Hard to separate         | Easy to separate                |
+| **NestJS**        | Not conventional         | Conventional                    |
+| **DDD**           | Doesn't support well     | Supports bounded contexts       |
 
 ---
 
-## 🔄 Plano de Migração
+## 🔄 Migration Plan
 
-### **Fase 1:** Criar estrutura de módulos
-1. Criar `src/ingestion/`
-2. Criar `src/dataset/`
-3. Criar `src/shared/`
+### Phase 1: Create module structure
 
-### **Fase 2:** Mover arquivos
+1. Create `src/ingestion/`
+2. Create `src/dataset/`
+3. Create `src/shared/`
+
+### Phase 2: Move files
 
 **Ingestion:**
+
 - `domain/entities/unified-data.entity.ts` → `ingestion/domain/entities/`
 - `domain/ingestion/*` → `ingestion/domain/interfaces/`
 - `application/use-cases/ingestion.usecase.ts` → `ingestion/application/use-cases/`
@@ -198,6 +205,7 @@ src/shared/
 - `interfaces/rest/admin.controller.ts` → `ingestion/interfaces/rest/`
 
 **Dataset:**
+
 - `domain/repositories/*` → `dataset/domain/repositories/`
 - `application/use-cases/query-data.usecase.ts` → `dataset/application/use-cases/`
 - `application/use-cases/get-data-by-id.usecase.ts` → `dataset/application/use-cases/`
@@ -205,17 +213,20 @@ src/shared/
 - `interfaces/rest/data.controller.ts` → `dataset/interfaces/rest/`
 
 **Shared:**
+
 - `config/*` → `shared/config/`
 - `infrastructure/http/*` → `shared/infrastructure/http/`
 - `infrastructure/database/*` → `shared/infrastructure/database/`
 - `infrastructure/sources/*` → `shared/infrastructure/sources/`
 
-### **Fase 3:** Atualizar imports
-1. Configurar path aliases no `tsconfig.json`
-2. Atualizar todos os imports
-3. Rodar testes para garantir que nada quebrou
+### Phase 3: Update imports
 
-### **Fase 4:** Atualizar AppModule
+1. Configure path aliases in `tsconfig.json`
+2. Update all imports
+3. Run tests to ensure nothing broke
+
+### Phase 4: Update AppModule
+
 ```typescript
 @Module({
   imports: [
@@ -233,16 +244,16 @@ export class AppModule {}
 
 ---
 
-## 🧪 Garantia de Qualidade
+## 🧪 Quality Assurance
 
-- ✅ Todos os testes devem continuar passando
-- ✅ Nenhuma funcionalidade quebrada
-- ✅ Coverage mantido ou melhorado
-- ✅ Linting sem erros
+- ✅ All tests must continue passing
+- ✅ No broken functionality
+- ✅ Coverage maintained or improved
+- ✅ Linting without errors
 
 ---
 
-## 📚 Referências
+## 📚 References
 
 1. [NestJS Module Organization](https://docs.nestjs.com/modules)
 2. [Domain-Driven Design - Bounded Contexts](https://martinfowler.com/bliki/BoundedContext.html)
@@ -250,16 +261,17 @@ export class AppModule {}
 
 ---
 
-## 🎯 Resultado Esperado
+## 🎯 Expected Result
 
-Código organizado por **contextos funcionais** ao invés de **camadas técnicas**, facilitando:
-- Navegação e manutenção
-- Escalabilidade do projeto
-- Decomposição em microservices
-- Onboarding de novos desenvolvedores
-- Alinhamento com convenções NestJS e DDD
+Code organized by **functional contexts** instead of **technical layers**, facilitating:
+
+- Navigation and maintenance
+- Project scalability
+- Decomposition into microservices
+- Onboarding of new developers
+- Alignment with NestJS and DDD conventions
 
 ---
 
-**Autor:** Rafael Silva Menezes  
+**Author:** Rafael Silva Menezes  
 **GitHub:** [@rafaelsmenezes](https://github.com/rafaelsmenezes)

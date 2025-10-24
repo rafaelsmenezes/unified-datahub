@@ -2,7 +2,7 @@ import { Model } from 'mongoose';
 import { MongoUnifiedDataRepository } from './mongo-unified-data.repository';
 import { MongoUnifiedData } from '../models/mongo-unified-data.schema';
 import { MongoUnifiedDataMapper } from '../models/mongo-unified-data.mapper';
-import { UnifiedData } from '../../../ingestion/domain/entities/unified-data.entity';
+import { UnifiedData } from '../../../../ingestion/domain/entities/unified-data.entity';
 
 describe('MongoUnifiedDataRepository', () => {
   let repo: MongoUnifiedDataRepository;
