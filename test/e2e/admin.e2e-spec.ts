@@ -2,7 +2,7 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AdminController } from 'src/interfaces/rest/admin.controller';
-import { IngestionUseCase } from 'src/application/use-cases/ingestion.usecase';
+import { IngestionUseCase } from 'src/ingestion/application/use-cases/ingestion.usecase';
 
 describe('AdminController (e2e) - /api/admin', () => {
   let app: INestApplication;
