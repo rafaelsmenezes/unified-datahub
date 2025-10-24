@@ -1,191 +1,119 @@
+# 🔄 UnifiedDataHub
 
----
+> Enterprise-grade data ingestion and unified query platform built with NestJS, TypeScript, and MongoDB
 
-# Buenro Tech Assessment – Backend Solution
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.7-blue)](https://www.typescriptlang.org/)
+[![NestJS](https://img.shields.io/badge/NestJS-11.0-red)](https://nestjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-8.0-green)](https://www.mongodb.com/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-## Overview
+## 🎯 Overview
 
-This project implements a **scalable ingestion and querying backend** using **NestJS**, **TypeScript**, and **MongoDB**, designed to support multiple external JSON sources of varying structure.
+**UnifiedDataHub** is a scalable, modular platform for ingesting data from multiple heterogeneous sources, transforming it into a unified schema, and exposing it through a flexible REST API.
 
-It fulfills the requirements of the Buenro Senior Backend Engineer technical case:
+**Use Cases:**
+* 🏢 Enterprise Data Integration
+* 📊 Data Aggregation Platforms
+* 🔄 ETL Pipelines (KB to GB scale)
+* 🔍 Unified Search APIs
+* 📈 Analytics & BI Platforms
 
-* Ingest multiple external JSONs (from S3) of sizes from KB to GB.
-* Store data in a unified structure that supports efficient queries.
-* Provide a single API endpoint with flexible filtering logic.
-* Easily extendable to new data sources.
+## ✨ Key Features
 
----
+* **Scalable Ingestion** - Stream-based processing for files 1KB to 1GB+
+* **Flexible Data Model** - Unified schema with dynamic `raw` field
+* **Powerful Query API** - Text search, range filters, pagination, sorting
+* **Clean Architecture** - Modular design following NestJS conventions
+* **Production Ready** - Comprehensive test coverage (86+ tests)
 
-## 🧱 Architecture
+## 🚀 Quick Start
+
+```bash
+# Clone and install
+git clone https://github.com/rafaelsmenezes/unified-datahub.git
+cd unified-datahub
+npm install
+
+# Configure
+cp .env.example .env
+# Edit .env with your MongoDB URI and data source URLs
+
+# Run
+npm run start:dev
+
+# API docs at http://localhost:3000/api/docs
+```
+
+## 📖 API Examples
+
+**Query data:**
+```http
+GET /api/data?q=search&city=London&priceMin=100&priceMax=500
+```
+
+**Get by ID:**
+```http
+GET /api/data/:id
+```
+
+**Trigger ingestion:**
+```http
+POST /api/admin/ingest
+```
+
+## 🧪 Testing
+
+```bash
+npm test              # All tests
+npm run test:cov      # With coverage
+npm run test:e2e      # E2E tests
+```
+
+## 🏗️ Architecture
+
+Organized by feature modules (vertical slices):
 
 ```
 src/
-├── domain/                    # Entities and interfaces
-├── application/               # Business logic (use cases)
-├── infrastructure/            # Data integration, storage, ingestion pipeline
-├── interfaces/                # Controllers and DTOs for REST API
-└── main.ts                    # Application bootstrap
+├── ingestion/        # Data ingestion module
+├── dataset/          # Query & retrieval module
+└── shared/           # Cross-cutting concerns
 ```
 
-### Layers
+## 🛠️ Tech Stack
 
-* **Domain:** Core definitions, contracts, and business rules.
-* **Application:** Use-cases coordinating ingestion and queries.
-* **Infrastructure:** Concrete components (HTTP client, mappers, Mongo repository, batching).
-* **Interfaces:** API controllers, data transformations, validation.
+* **NestJS** 11.x - Progressive Node.js framework
+* **TypeScript** 5.7 - Type-safe development
+* **MongoDB** 8.x - Document database
+* **Mongoose** - ODM for MongoDB
+* **stream-json** - Memory-efficient JSON streaming
+* **Jest** - Testing framework
+
+## 📊 Performance
+
+* Stream-based processing for constant memory usage
+* MongoDB indexes on frequently queried fields
+* Batch upserts for efficient bulk operations
+* Configurable batch size for tuning
+
+## 🔧 Adding a New Data Source
+
+1. Create mapper in `src/ingestion/infrastructure/mappers/`
+2. Register in `src/shared/config/sources.config.ts`
+3. Add to SourcesModule factory
+
+No changes to core logic needed! ✨
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file
+
+## 👨‍💻 Author
+
+**Rafael Silva Menezes**
+* GitHub: [@rafaelsmenezes](https://github.com/rafaelsmenezes)
+* LinkedIn: [rafaelsilvamenezes](https://www.linkedin.com/in/rafaelsilvamenezes)
 
 ---
 
-## ⚙️ Key Capabilities
-
-### Data Ingestion
-
-* Streams JSON from remote sources via HTTP (S3 endpoints).
-* Processes large files without loading entire content into memory.
-* Uses `batchStream` and bulk upsert to efficiently persist data.
-* Supports multiple sources with separate mappers and registration.
-
-### Unified Data Model
-
-* A single `UnifiedData` entity captures common fields, plus `raw` for extras.
-* Mongo schema supports indexes on frequently filtered fields.
-* Compound index `{ source, externalId }` ensures idempotency.
-* Dynamic extensibility via the `raw` field for additional attributes.
-
-### API & Filtering
-
-* Endpoint: `GET /api/data`
-* Filterable parameters:
-
-  * `q` (text search), `source`, `city`, boolean `availability`, numeric `priceMin / priceMax`, `priceSegment`.
-* Supports pagination, sorting, and combined filters.
-* `GET /api/data/:id` returns single item, or `404` if not found.
-
----
-
-## 🧩 How to Run
-
-### Prerequisites
-
-* Node.js (v20+)
-* MongoDB (local or remote)
-* (Optional) Docker for Mongo
-
-### Setup
-
-```bash
-git clone https://github.com/rafaelsmenezes/buenro-tech-assessment.git
-cd buenro-tech-assessment
-npm install
-```
-
-Create `.env` file:
-
-```
-MONGODB_URI=mongodb://localhost:27017/buenro
-PORT=3000
-SOURCE1_URL=<your source1 JSON URL>
-SOURCE2_URL=<your source2 JSON URL>
-INGESTION_CRON=*/5 * * * * # Cron job runs every 5 minutes
-```
-
-### Run
-
-Start MongoDB via Docker
-```bash
-docker compose up -d
-```
-Run in Development Mode
-```bash
-npm run start:dev
-```
-Build and Run Production Mode
-```bash
-npm run build
-npm start
-```
-Trigger Manual Ingestion
-```
-POST /api/admin/ingest
-```
-The cron job will automatically ingest data based on the INGESTION_CRON schedule (every 5 minutes in this config).
-
----
-
-## 🔍 Example Query
-
-```
-GET http://localhost:3000/api/data?q=Lisbon&source=source1&priceMin=100
-```
-
-Sample response:
-
-```json
-{
-  "items": [
-    {
-      "source": "source1",
-      "externalId": "123456",
-      "name": "Ocean View Apartment",
-      "city": "Lisbon",
-      "pricePerNight": 320,
-      "availability": true,
-      "raw": { /* original record */ }
-    }
-  ],
-  "meta": {
-    "total": 1,
-    "limit": 25,
-    "skip": 0
-  }
-}
-```
-
----
-
-## 🚀 Extending to New Sources
-
-To support an additional JSON source:
-
-1. Create a new mapper in `infrastructure/ingestion/mappers` (e.g. `Source3Mapper`) implementing `map(record: any): UnifiedData`.
-2. Add its registration in `registerSources` (in `sources.config.ts`).
-3. The ingestion pipeline will automatically process it with existing batching, streaming, and persistence logic.
-
-No changes to core ingestion or API layers are required.
-
----
-
-## 🧠 Design Decisions & Trade-offs
-
-| Concern                | Approach Taken                                |
-| ---------------------- | --------------------------------------------- |
-| Large JSON handling    | Streaming + batching, avoiding memory bloat   |
-| High-throughput writes | Bulk upserts in chunked operations            |
-| Schema flexibility     | Unified schema + `raw` for optional extras    |
-| Query flexibility      | Dynamic filter builder, regex support         |
-| Performance            | Indexed fields, lean queries, bulk writes     |
-| Extensibility          | Mapper + registration pattern for new sources |
-
----
-
-## ✔️ Readiness Assessment
-
-This solution satisfies all required criteria of the technical challenge:
-
-* Architecture is modular and extensible.
-* Data model is unified and index-aware.
-* Filtering logic is comprehensive (text, numeric, boolean).
-* Performance and memory usage are carefully considered.
-* Adding a new source is trivial via mapper + registration.
-
-> 💡 **Note:** Future improvements could include ingestion parallelism, structured logging, dynamic filter builder for new `raw` fields, caching, and advanced full-text search. These are optional enhancements and not required for delivery. Those improvements could be found in the doc folder.
-
----
-
-## 📎 Author & Links
-
-**Rafael Menezes**
-GitHub: [https://github.com/rafaelsmenezes](https://github.com/rafaelsmenezes)
-LinkedIn: [https://www.linkedin.com/in/rafaelsilvamenezes](https://www.linkedin.com/in/rafaelsilvamenezes)
-
----
+⭐ **If you find this project useful, please give it a star!**

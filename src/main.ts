@@ -8,9 +8,11 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
 
   const config = new DocumentBuilder()
-    .setTitle('Buenro Tech Assessment API')
-    .setDescription('APIs for unified data ingestion and querying')
-    .setVersion('1.0')
+    .setTitle('UnifiedDataHub API')
+    .setDescription('Enterprise Data Ingestion & Unified Query Platform')
+    .setVersion('2.0')
+    .addTag('data', 'Data query operations')
+    .addTag('admin', 'Administrative operations')
     .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
     .build();
 

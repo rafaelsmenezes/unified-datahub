@@ -9,10 +9,7 @@
 
 ## 📋 Contexto
 
-Após feedback de uma avaliação técnica, identificamos que o projeto, embora tecnicamente sólido, não seguia completamente as **convenções e padrões idiomáticos do NestJS**. 
-
-O feedback foi:
-> "While the candidate demonstrates strong JavaScript/TypeScript skills, his understanding of NestJS conventions and architecture appears to be limited."
+Durante a evolução do projeto, identificamos oportunidades de melhorar a aderência às **convenções e padrões idiomáticos do NestJS**.
 
 Este RFC documenta a refatoração completa do projeto para alinhar com as melhores práticas do framework.
 
